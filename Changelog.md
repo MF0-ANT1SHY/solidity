@@ -3,7 +3,9 @@
 Language Features:
 
 Compiler Features:
+* Custom Storage Layout: the base slot expression can also be specified by constant variables.
 * ethdebug: Experimental support for instructions and source locations under EOF.
+
 
 Bugfixes:
 * Assembler: Fix not using a fixed-width type for IDs being assigned to subassemblies nested more than one level away, resulting in inconsistent `--asm-json` output between target architectures.
