@@ -290,9 +290,9 @@ void ArrayUtils::copyArrayToStorage(ArrayType const& _targetType, ArrayType cons
 			_context << Instruction::POP << Instruction::SWAP1 << Instruction::POP;
 			// stack: target_ref target_data_end target_data_pos_updated
 			if (targetBaseType->storageBytes() < 32)
-				utils.clearStorageLoop(TypeProvider::uint256(), false); // TODO: check the boolean
+				utils.clearStorageLoop(TypeProvider::uint256(), !targetType->isDynamicallySized());
 			else
-				utils.clearStorageLoop(targetBaseType, false); // TODO: check the boolean
+				utils.clearStorageLoop(targetBaseType, !targetType->isDynamicallySized());
 			_context << Instruction::POP;
 		}
 	);
@@ -590,9 +590,9 @@ void ArrayUtils::clearArray(ArrayType const& _typeIn) const
 				ArrayUtils(_context).convertLengthToSize(_type);
 				_context << Instruction::ADD << Instruction::SWAP1;
 				if (_type.baseType()->storageBytes() < 32)
-					ArrayUtils(_context).clearStorageLoop(TypeProvider::uint256(), !_type.isDynamicallySized()); // TODO: check boolean
+					ArrayUtils(_context).clearStorageLoop(TypeProvider::uint256(), !_type.isDynamicallySized());
 				else
-					ArrayUtils(_context).clearStorageLoop(_type.baseType(), !_type.isDynamicallySized()); // TODO: check boolean
+					ArrayUtils(_context).clearStorageLoop(_type.baseType(), !_type.isDynamicallySized());
 				_context << Instruction::POP;
 			}
 			solAssert(_context.stackHeight() == stackHeightStart - 2, "");
@@ -631,9 +631,9 @@ void ArrayUtils::clearDynamicArray(ArrayType const& _type) const
 		<< Instruction::SWAP1;
 	// stack: data_pos_end data_pos
 	if (_type.storageStride() < 32)
-		clearStorageLoop(TypeProvider::uint256(), false); // TODO: check boolean
+		clearStorageLoop(TypeProvider::uint256(), /* _canOverflow */ false);
 	else
-		clearStorageLoop(_type.baseType(), false); // TODO: check boolean
+		clearStorageLoop(_type.baseType(), /* _canOverflow */ false);
 	// cleanup
 	m_context << endTag;
 	m_context << Instruction::POP;
@@ -771,14 +771,14 @@ void ArrayUtils::popStorageArrayElement(ArrayType const& _type) const
 	}
 }
 
-void ArrayUtils::clearStorageLoop(Type const* _type, bool _assumeEndAfterStart) const
+void ArrayUtils::clearStorageLoop(Type const* _type, bool _canOverflow) const
 {
 	solAssert(_type->storageBytes() >= 32, "");
 	m_context.callLowLevelFunction(
 		"$clearStorageLoop_" + _type->identifier(),
 		2,
 		1,
-		[_type, _assumeEndAfterStart](CompilerContext& _context)
+		[_type, _canOverflow](CompilerContext& _context)
 		{
 			unsigned stackHeightStart = _context.stackHeight();
 			if (_type->category() == Type::Category::Mapping)
@@ -794,7 +794,7 @@ void ArrayUtils::clearStorageLoop(Type const* _type, bool _assumeEndAfterStart) 
 			_context <<
 				Instruction::DUP1 <<
 				Instruction::DUP3;
-			if (_assumeEndAfterStart)
+			if (_canOverflow)
 				_context << Instruction::EQ;
 			else
 				_context << Instruction::GT << Instruction::ISZERO;

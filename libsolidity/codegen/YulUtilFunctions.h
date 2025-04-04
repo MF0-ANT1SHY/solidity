@@ -268,7 +268,8 @@ public:
 	/// @returns the name of a function that will clear the storage area given
 	/// by the start and end (exclusive) parameters (slots).
 	/// signature: (start, end)
-	std::string clearStorageRangeFunction(Type const& _type, bool _assumeEndAfterStart);
+	/// if _canOverflow is true, it treats the storage as circular and clears by wrapping around.
+	std::string clearStorageRangeFunction(Type const& _type, bool _canOverflow);
 
 	/// @returns the name of a function that will clear the given storage array
 	/// signature: (slot) ->
@@ -618,7 +619,7 @@ private:
 	std::string cleanUpDynamicByteArrayEndSlotsFunction(ArrayType const& _type);
 
 	/// @returns the name of a function that increases size of byte array
-	/// when we resize byte array frextractUsedSetLenom < 32 elements to >= 32 elements or we push to byte array of size 31 copying of data will  occur
+	/// when we resize byte array from < 32 elements to >= 32 elements or we push to byte array of size 31 copying of data will  occur
 	/// signature: (array, data, oldLen, newLen)
 	std::string increaseByteArraySizeFunction(ArrayType const& _type);
 

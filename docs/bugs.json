@@ -1,6 +1,6 @@
 [
     {
-        "uid": "SOL-2025-4",
+        "uid": "SOL-2025-1",
         "name": "InconsistentTreatmentOfStorageArraysOnSlotOverflowBoundary",
         "summary": "Fixed-length storage arrays crossing the 2^256 slot boundary can exhibit unexpected behavior when cleared (using the delete operator) or partially assigned, leading to silent data retention and inconsistent results.",
         "description": "Large static arrays in storage risk overlapping the 2^256 storage slot boundary. Partial assignments or delete operations may not properly reset all elements in such conditions, causing inconsistency during deletion and unexpected data retention. Although such situations are exceedingly rare in typical contracts, overflow on array deletion become more plausible when arrays are extremely large or the storage is manually positioned close to the storage boundaries. The compiler already warns about potential storage collisions in such scenarios.",

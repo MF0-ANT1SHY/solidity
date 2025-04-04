@@ -1,0 +1,33 @@
+contract C {
+    function getArray() internal pure returns (uint256[10][1] storage _x) {
+        assembly {
+            _x.slot := sub(0, 5)
+        }
+    }
+
+    function fillArray() public {
+        uint256[10][1] storage _x = getArray();
+        for (uint i = 1; i < 10; i++)
+            _x[0][i] = i;
+    }
+
+    function x() public view returns (uint256[10] memory) {
+        return getArray()[0];
+    }
+
+    function partialAssignArray() public {
+        uint256[10][1] storage _x = getArray();
+        _x[0] = [11, 12, 13, 14, 15, 16, 17];
+    }
+}
+// ----
+// x() -> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+// fillArray()
+// gas irOptimized: 220705
+// gas legacyOptimized: 220871
+// x() -> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+// partialAssignArray()
+// x() -> 11, 12, 13, 14, 15, 0x10, 0x11, 0, 0, 0
+// gas irOptimized: 198025
+// gas legacy: 200268
+// gas legacyOptimized: 198058
