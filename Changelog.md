@@ -10,6 +10,9 @@ Bugfixes:
 
 ### 0.8.30 (2025-05-07)
 
+Important Bugfixes:
+* Code Generator: Fix inconsistent handling of storage arrays at the slot overflow boundary, which could lead to incorrect storage cleanup when using `delete` or partial assignments of arrays.
+
 Compiler Features:
 * EVM: Set default EVM Version to `prague`.
 * NatSpec: Capture Natspec documentation of `enum` values in the AST.
