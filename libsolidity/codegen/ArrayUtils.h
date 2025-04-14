@@ -61,10 +61,6 @@ public:
 	/// Stack pre: reference (excludes byte offset)
 	/// Stack post:
 	void clearDynamicArray(ArrayType const& _type) const;
-	/// Changes the size of a dynamic array and clears the tail if it is shortened.
-	/// Stack pre: reference (excludes byte offset) new_length
-	/// Stack post:
-	void resizeDynamicArray(ArrayType const& _type) const;
 	/// Increments the size of a dynamic array by one.
 	/// Does not touch the new data element. In case of a byte array, this might move the
 	/// data.
