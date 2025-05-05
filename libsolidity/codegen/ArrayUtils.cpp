@@ -290,7 +290,25 @@ void ArrayUtils::copyArrayToStorage(ArrayType const& _targetType, ArrayType cons
 			_context << Instruction::POP << Instruction::SWAP1 << Instruction::POP;
 			// stack: target_ref target_data_end target_data_pos_updated
 			if (targetBaseType->storageBytes() < 32)
+			{
+				if (!targetType->isDynamicallySized() && !sourceType->isDynamicallySized())
+					if (auto const* targetArrayType = dynamic_cast<ArrayType const*>(targetType))
+					{
+						auto const* sourceArrayType = dynamic_cast<ArrayType const*>(sourceType);
+						solAssert(sourceArrayType);
+
+						auto const numSourceItemsPerSlot = 32 / sourceArrayType->baseType()->storageBytes();
+						auto const paddedLength = numSourceItemsPerSlot * sourceArrayType->storageSize();
+						auto const paddedTargetType = TypeProvider::array(targetArrayType->location(), targetArrayType->baseType(), paddedLength);
+
+						if (paddedTargetType->storageSize() >= targetArrayType->storageSize())
+						{
+							_context << Instruction::POP << Instruction::POP;
+							return;
+						}
+					}
 				utils.clearStorageLoop(TypeProvider::uint256(), !targetType->isDynamicallySized());
+			}
 			else
 				utils.clearStorageLoop(targetBaseType, !targetType->isDynamicallySized());
 			_context << Instruction::POP;
@@ -775,7 +793,7 @@ void ArrayUtils::clearStorageLoop(Type const* _type, bool _canOverflow) const
 {
 	solAssert(_type->storageBytes() >= 32, "");
 	m_context.callLowLevelFunction(
-		"$clearStorageLoop_" + _type->identifier(),
+		"$clearStorageLoop_" + _type->identifier() + (_canOverflow ? "_canOverflow" : "cannotOverflow"),
 		2,
 		1,
 		[_type, _canOverflow](CompilerContext& _context)

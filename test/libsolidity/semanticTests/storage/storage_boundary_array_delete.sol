@@ -24,6 +24,7 @@ contract C {
 // x() -> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 // fillArray()
 // gas irOptimized: 220705
+// gas legacy: 221434
 // gas legacyOptimized: 220871
 // x() -> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 // clearArray()

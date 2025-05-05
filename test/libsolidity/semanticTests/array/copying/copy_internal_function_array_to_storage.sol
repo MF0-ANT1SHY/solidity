@@ -18,6 +18,6 @@ contract C {
 }
 // ----
 // one() -> 3
-// gas legacy: 140253
+// gas legacy: 140250
 // gas legacyOptimized: 140093
 // two() -> FAILURE, hex"4e487b71", 0x51
