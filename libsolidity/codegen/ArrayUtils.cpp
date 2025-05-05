@@ -608,9 +608,9 @@ void ArrayUtils::clearArray(ArrayType const& _typeIn) const
 				ArrayUtils(_context).convertLengthToSize(_type);
 				_context << Instruction::ADD << Instruction::SWAP1;
 				if (_type.baseType()->storageBytes() < 32)
-					ArrayUtils(_context).clearStorageLoop(TypeProvider::uint256(), !_type.isDynamicallySized());
+					ArrayUtils(_context).clearStorageLoop(TypeProvider::uint256(), /* _canOverflow */ true);
 				else
-					ArrayUtils(_context).clearStorageLoop(_type.baseType(), !_type.isDynamicallySized());
+					ArrayUtils(_context).clearStorageLoop(_type.baseType(), /* _canOverflow */ true);
 				_context << Instruction::POP;
 			}
 			solAssert(_context.stackHeight() == stackHeightStart - 2, "");
@@ -793,7 +793,7 @@ void ArrayUtils::clearStorageLoop(Type const* _type, bool _canOverflow) const
 {
 	solAssert(_type->storageBytes() >= 32, "");
 	m_context.callLowLevelFunction(
-		"$clearStorageLoop_" + _type->identifier() + (_canOverflow ? "_canOverflow" : "cannotOverflow"),
+		"$clearStorageLoop_" + _type->identifier() + (_canOverflow ? "_canOverflow" : "_cannotOverflow"),
 		2,
 		1,
 		[_type, _canOverflow](CompilerContext& _context)

@@ -1822,7 +1822,7 @@ std::string YulUtilFunctions::clearStorageRangeFunction(Type const& _type, bool 
 	if (_type.storageBytes() < 32)
 		solAssert(_type.isValueType(), "");
 
-	std::string functionName = "clear_storage_range_" + _type.identifier();
+	std::string functionName = "clear_storage_range_" + _type.identifier() + (_canOverflow ? "_canOverflow" : "_cannotOverflow");
 
 	return m_functionCollector.createFunction(functionName, [&]() {
 		return Whiskers(R"(
