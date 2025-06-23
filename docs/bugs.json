@@ -6,7 +6,7 @@
         "description": "Large static arrays in storage risk overlapping the 2^256 storage slot boundary. Partial assignments or delete operations may not properly reset all elements in such conditions, causing inconsistency during deletion and unexpected data retention. Although such situations are exceedingly rare in typical contracts, overflow on array deletion become more plausible when arrays are extremely large or the storage is manually positioned close to the storage boundaries. The compiler already warns about potential storage collisions in such scenarios.",
         "link": "TODO",
         "introduced": "0.1.1",
-        "fixed": "0.8.30",
+        "fixed": "0.8.31",
         "severity": "low"
     },
     {

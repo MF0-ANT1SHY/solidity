@@ -2037,7 +2037,9 @@
         "released": "2021-03-23"
     },
     "0.8.30": {
-        "bugs": [],
+        "bugs": [
+            "InconsistentTreatmentOfStorageArraysOnSlotOverflowBoundary"
+        ],
         "released": "2025-05-07"
     },
     "0.8.4": {
