@@ -1523,7 +1523,7 @@ std::string YulUtilFunctions::decreaseByteArraySizeFunction(ArrayType const& _ty
 			("functionName", functionName)
 			("dataPosition", arrayDataAreaFunction(_type))
 			("partialClearStorageSlot", partialClearStorageSlotFunction())
-			("clearStorageRange", clearStorageRangeFunction(*_type.baseType(), /* _canOverflow */ true))
+			("clearStorageRange", clearStorageRangeFunction(*_type.baseType(), !_type.isDynamicallySized()))
 			("transitLongToShort", byteArrayTransitLongToShortFunction(_type))
 			("div32Ceil", divide32CeilFunction())
 			("encodeUsedSetLen", shortByteArrayEncodeUsedAreaSetLengthFunction())
@@ -1827,8 +1827,7 @@ std::string YulUtilFunctions::clearStorageRangeFunction(Type const& _type, bool 
 	return m_functionCollector.createFunction(functionName, [&]() {
 		return Whiskers(R"(
 			function <functionName>(start, end) {
-				for {} <compare>(start, end) { start := add(start, <increment>) }
-				{
+				for {} <compare>(start, end) { start := add(start, <increment>) } {
 					<setToZero>(start, 0)
 				}
 			}

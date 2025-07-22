@@ -805,7 +805,6 @@ void ArrayUtils::clearStorageLoop(Type const* _type, bool _canOverflow) const
 				return;
 			}
 			// stack: end_pos pos
-
 			evmasm::AssemblyItem loopStart = _context.appendJumpToNew();
 			_context << loopStart;
 			// check for loop condition
@@ -828,7 +827,6 @@ void ArrayUtils::clearStorageLoop(Type const* _type, bool _canOverflow) const
 			// cleanup
 			_context << zeroLoopEnd;
 			_context << Instruction::POP;
-
 			solAssert(_context.stackHeight() == stackHeightStart - 1, "");
 		}
 	);
