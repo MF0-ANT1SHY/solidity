@@ -20,4 +20,5 @@ contract Test {
     }
 }
 // ----
+// Warning 9511: (B:0-19): ABI coder v1 will be deprecated in the next breaking version.
 // TypeError 2443: (B:166-175): The type of this parameter, struct C.Item memory, is only supported in ABI coder v2. Use "pragma abicoder v2;" to enable the feature.

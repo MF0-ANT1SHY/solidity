@@ -5,4 +5,5 @@ contract C {
     }
 }
 // ----
+// Warning 9511: (0-19): ABI coder v1 will be deprecated in the next breaking version.
 // TypeError 9578: (89-119): Type not supported in packed mode.

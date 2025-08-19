@@ -10,4 +10,5 @@ contract test {
 // EVMVersion: >=shanghai
 // bytecodeFormat: legacy
 // ----
+// Warning 9511: (0-19): ABI coder v1 will be deprecated in the next breaking version.
 // Warning 5574: (21-27154): Contract code size is 27205 bytes and exceeds 24576 bytes (a limit introduced in Spurious Dragon). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.

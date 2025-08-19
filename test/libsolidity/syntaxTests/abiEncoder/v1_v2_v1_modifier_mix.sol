@@ -55,3 +55,6 @@ contract X {
 // ====
 // bytecodeFormat: legacy
 // ----
+// Warning 9511: (V1A:0-19): ABI coder v1 will be deprecated in the next breaking version.
+// Warning 9511: (V1B:0-19): ABI coder v1 will be deprecated in the next breaking version.
+// Warning 9511: (C:0-19): ABI coder v1 will be deprecated in the next breaking version.
