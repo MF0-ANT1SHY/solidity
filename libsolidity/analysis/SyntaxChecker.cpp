@@ -149,6 +149,13 @@ bool SyntaxChecker::visit(PragmaDirective const& _pragma)
 			);
 		else
 			m_sourceUnit->annotation().useABICoderV2 = (_pragma.literals()[1] == "v2");
+
+		if (_pragma.literals().size() > 1 && _pragma.literals()[1] == "v1")
+			m_errorReporter.warning(
+				9511_error,
+				_pragma.location(),
+				"ABI coder v1 will be deprecated in the next breaking version."
+			);
 	}
 	else if (_pragma.literals()[0] == "solidity")
 	{
