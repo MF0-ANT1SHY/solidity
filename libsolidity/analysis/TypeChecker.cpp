@@ -1829,6 +1829,16 @@ void TypeChecker::endVisit(BinaryOperation const& _operation)
 				)
 			);
 	}
+	if (
+		TokenTraits::isCompareOp(_operation.getOperator()) &&
+		commonType->category() == Type::Category::Contract
+	)
+		m_errorReporter.warning(
+			9170_error,
+			_operation.location(),
+			"Comparison of variables of contract type will be deprecated in the next breaking version."
+			"Consider using an explicit cast to address type."
+		);
 }
 
 Type const* TypeChecker::typeCheckTypeConversionAndRetrieveReturnType(
