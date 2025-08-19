@@ -191,6 +191,10 @@ void SyntaxChecker::endVisit(ModifierDefinition const& _modifier)
 {
 	if (_modifier.isImplemented() && !m_placeholderFound)
 		m_errorReporter.syntaxError(2883_error, _modifier.body().location(), "Modifier body does not contain '_'.");
+
+	if (_modifier.markedVirtual())
+		m_errorReporter.warning(8429_error, _modifier.location(), "Virtual modifiers will be deprecated in the next breaking version.");
+
 	m_placeholderFound = false;
 }
 
