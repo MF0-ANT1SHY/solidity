@@ -4,3 +4,4 @@ contract C {
     }
 }
 // ----
+// Warning 9207: (47-107): transfer will be deprecated in the next breaking version.

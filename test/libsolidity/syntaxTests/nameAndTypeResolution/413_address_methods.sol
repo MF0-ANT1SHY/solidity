@@ -10,3 +10,5 @@ contract C {
     }
 }
 // ----
+// Warning 9207: (227-236): send will be deprecated in the next breaking version.
+// Warning 9207: (249-262): transfer will be deprecated in the next breaking version.

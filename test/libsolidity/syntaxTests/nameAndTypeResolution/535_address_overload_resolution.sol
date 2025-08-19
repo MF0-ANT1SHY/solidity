@@ -17,4 +17,5 @@ contract D {
     }
 }
 // ----
+// Warning 9207: (187-209): transfer will be deprecated in the next breaking version.
 // Warning 2018: (17-134): Function state mutability can be restricted to view

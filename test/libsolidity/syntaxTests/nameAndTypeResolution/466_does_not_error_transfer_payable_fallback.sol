@@ -13,3 +13,4 @@ contract B {
     }
 }
 // ----
+// Warning 9207: (227-246): transfer will be deprecated in the next breaking version.

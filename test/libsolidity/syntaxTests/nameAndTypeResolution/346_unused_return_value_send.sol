@@ -4,4 +4,5 @@ contract test {
     }
 }
 // ----
+// Warning 9207: (50-77): send will be deprecated in the next breaking version.
 // Warning 5878: (50-80): Failure condition of 'send' ignored. Consider using 'transfer' instead.
