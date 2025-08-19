@@ -8,4 +8,7 @@ contract C is A, B {
     modifier f() virtual override(A, B) { _; }
 }
 // ----
+// Warning 8429: (17-50): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (70-97): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (125-167): Virtual modifiers will be deprecated in the next breaking version.
 // TypeError 1078: (125-167): Override changes modifier signature.

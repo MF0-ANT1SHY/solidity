@@ -17,3 +17,5 @@ contract C is B {
         _; f(x);
     }
 }
+// ----
+// Warning 8429: (88-137): Virtual modifiers will be deprecated in the next breaking version.

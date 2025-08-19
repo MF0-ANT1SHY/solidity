@@ -9,3 +9,6 @@ abstract contract C is B {
     function f() m public {}
 }
 // ----
+// Warning 8429: (26-47): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (81-111): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (145-175): Virtual modifiers will be deprecated in the next breaking version.

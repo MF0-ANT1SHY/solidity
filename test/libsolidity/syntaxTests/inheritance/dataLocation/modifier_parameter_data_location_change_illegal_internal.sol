@@ -10,4 +10,5 @@ contract B is A {
     }
 }
 // ----
+// Warning 8429: (26-66): Virtual modifiers will be deprecated in the next breaking version.
 // TypeError 1078: (153-214): Override changes modifier signature.

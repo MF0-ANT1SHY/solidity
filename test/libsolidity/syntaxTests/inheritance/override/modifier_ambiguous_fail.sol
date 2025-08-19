@@ -7,4 +7,6 @@ contract B {
 contract C is A, B {
 }
 // ----
+// Warning 8429: (17-44): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (64-91): Virtual modifiers will be deprecated in the next breaking version.
 // TypeError 6480: (94-116): Derived contract must override modifier "f". Two or more base classes define modifier with same name.

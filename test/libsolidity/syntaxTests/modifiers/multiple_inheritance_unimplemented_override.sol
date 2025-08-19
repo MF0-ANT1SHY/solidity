@@ -9,3 +9,5 @@ contract C is A, B {
     function f() m public {}
 }
 // ----
+// Warning 8429: (17-44): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (73-94): Virtual modifiers will be deprecated in the next breaking version.

@@ -5,3 +5,4 @@ contract C
 	modifier modi() virtual {_;}
 }
 // ----
+// Warning 8429: (83-111): Virtual modifiers will be deprecated in the next breaking version.

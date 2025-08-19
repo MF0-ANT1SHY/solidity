@@ -30,4 +30,5 @@ contract C is B {
 // ====
 // bytecodeFormat: legacy
 // ----
+// Warning 8429: (A:156-234): Virtual modifiers will be deprecated in the next breaking version.
 // Warning 9511: (B:0-19): ABI coder v1 will be deprecated in the next breaking version.
