@@ -18,6 +18,7 @@ contract C {
 // ====
 // SMTEngine: all
 // ----
+// Warning 9170: (206-214): Comparison of variables of contract type will be deprecated in the next breaking version.Consider using an explicit cast to address type.
 // Warning 2072: (146-183): Unused local variable.
 // Warning 8364: (187-193): Assertion checker does not yet implement type function () view external returns (contract D,function () external returns (uint256))
 // Warning 6328: (234-269): CHC: Assertion violation happens here.

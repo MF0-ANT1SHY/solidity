@@ -23,4 +23,6 @@ contract C is B {
 // ====
 // SMTEngine: all
 // ----
+// Warning 8429: (113-136): Virtual modifiers will be deprecated in the next breaking version.
+// Warning 8429: (159-213): Virtual modifiers will be deprecated in the next breaking version.
 // Warning 6328: (66-75): CHC: Assertion violation happens here.\nCounterexample:\ns = false\n\nTransaction trace:\nB.constructor()\nState: s = false\nA.f()

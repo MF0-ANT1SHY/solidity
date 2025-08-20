@@ -10,3 +10,4 @@ contract C is A {
 // ====
 // SMTEngine: all
 // ----
+// Warning 8429: (17-52): Virtual modifiers will be deprecated in the next breaking version.

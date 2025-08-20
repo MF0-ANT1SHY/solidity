@@ -12,6 +12,8 @@ contract C
 // SMTEngine: all
 // SMTIgnoreCex: yes
 // ----
+// Warning 9207: (101-111): transfer will be deprecated in the next breaking version.
+// Warning 9207: (120-130): transfer will be deprecated in the next breaking version.
 // Warning 8656: (101-116): CHC: Insufficient funds happens here.
 // Warning 8656: (120-136): CHC: Insufficient funds happens here.
 // Warning 6328: (180-204): CHC: Assertion violation happens here.

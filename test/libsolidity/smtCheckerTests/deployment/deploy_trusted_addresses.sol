@@ -16,4 +16,5 @@ contract C {
 // SMTEngine: all
 // SMTExtCalls: trusted
 // ----
+// Warning 9170: (107-115): Comparison of variables of contract type will be deprecated in the next breaking version.Consider using an explicit cast to address type.
 // Info 1391: CHC: 3 verification condition(s) proved safe! Enable the model checker option "show proved safe" to see all of them.

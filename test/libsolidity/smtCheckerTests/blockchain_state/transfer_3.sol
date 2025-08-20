@@ -8,4 +8,5 @@ contract C {
 // ====
 // SMTEngine: all
 // ----
+// Warning 9207: (76-94): transfer will be deprecated in the next breaking version.
 // Warning 8656: (76-97): CHC: Insufficient funds happens here.

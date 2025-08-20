@@ -15,6 +15,7 @@ contract C {
 // ====
 // SMTEngine: all
 // ----
+// Warning 9170: (107-115): Comparison of variables of contract type will be deprecated in the next breaking version.Consider using an explicit cast to address type.
 // Warning 8729: (70-77): Contract deployment is only supported in the trusted mode for external calls with the CHC engine.
 // Warning 8729: (88-95): Contract deployment is only supported in the trusted mode for external calls with the CHC engine.
 // Warning 6328: (100-116): CHC: Assertion violation happens here.\nCounterexample:\n\nd1 = 0\nd2 = 0\n\nTransaction trace:\nC.constructor()\nC.f()

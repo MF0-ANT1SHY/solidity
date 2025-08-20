@@ -20,5 +20,6 @@ contract B is A {
 // ====
 // SMTEngine: all
 // ----
+// Warning 8429: (64-93): Virtual modifiers will be deprecated in the next breaking version.
 // Warning 6328: (209-223): CHC: Assertion violation happens here.
 // Info 1391: CHC: 1 verification condition(s) proved safe! Enable the model checker option "show proved safe" to see all of them.

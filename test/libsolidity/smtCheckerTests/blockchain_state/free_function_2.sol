@@ -19,5 +19,6 @@ contract C {
 // SMTEngine: all
 // SMTIgnoreCex: yes
 // ----
+// Warning 9207: (33-43): transfer will be deprecated in the next breaking version.
 // Warning 6328: (258-274): CHC: Assertion violation happens here.
 // Info 1391: CHC: 4 verification condition(s) proved safe! Enable the model checker option "show proved safe" to see all of them.

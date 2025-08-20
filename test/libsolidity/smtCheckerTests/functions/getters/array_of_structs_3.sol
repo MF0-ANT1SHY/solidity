@@ -21,5 +21,6 @@ contract D {
 // ====
 // SMTEngine: all
 // ----
+// Warning 9511: (0-19): ABI coder v1 will be deprecated in the next breaking version.
 // Warning 6328: (322-336): CHC: Assertion violation happens here.
 // Info 1391: CHC: 2 verification condition(s) proved safe! Enable the model checker option "show proved safe" to see all of them.
