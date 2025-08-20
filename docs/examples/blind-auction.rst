@@ -124,6 +124,7 @@ to receive their Ether - contracts cannot activate themselves.
                 // msg.sender is not of type `address payable` and must be
                 // explicitly converted using `payable(msg.sender)` in order
                 // use the member function `send()`.
+                // This will report a warning
                 if (!payable(msg.sender).send(amount)) {
                     // No need to call throw here, just reset the amount owing
                     pendingReturns[msg.sender] = amount;
@@ -160,6 +161,7 @@ to receive their Ether - contracts cannot activate themselves.
             emit AuctionEnded(highestBidder, highestBid);
 
             // 3. Interaction
+            // This will report a warning
             beneficiary.transfer(highestBid);
         }
     }
@@ -310,6 +312,7 @@ invalid bids.
                 // the same deposit.
                 bidToCheck.blindedBid = bytes32(0);
             }
+            // This will report a warning
             payable(msg.sender).transfer(refund);
         }
 
@@ -323,6 +326,7 @@ invalid bids.
                 // conditions -> effects -> interaction).
                 pendingReturns[msg.sender] = 0;
 
+                // This will report a warning
                 payable(msg.sender).transfer(amount);
             }
         }
@@ -336,6 +340,7 @@ invalid bids.
             if (ended) revert AuctionEndAlreadyCalled();
             emit AuctionEnded(highestBidder, highestBid);
             ended = true;
+            // This will report a warning
             beneficiary.transfer(highestBid);
         }
 

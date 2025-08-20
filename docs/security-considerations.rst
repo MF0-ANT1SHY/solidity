@@ -65,6 +65,7 @@ To give an example, the following code contains a bug (it is just a snippet and 
         mapping(address => uint) shares;
         /// Withdraw your share.
         function withdraw() public {
+        // This will report a warning
             if (payable(msg.sender).send(shares[msg.sender]))
                 shares[msg.sender] = 0;
         }
@@ -109,6 +110,7 @@ To avoid reentrancy, you can use the Checks-Effects-Interactions pattern as demo
         function withdraw() public {
             uint share = shares[msg.sender];
             shares[msg.sender] = 0;
+            // This will report a warning
             payable(msg.sender).transfer(share);
         }
     }
@@ -255,6 +257,7 @@ Let's say you have a wallet contract like this:
         function transferTo(address payable dest, uint amount) public {
             // THE BUG IS RIGHT HERE, you must use msg.sender instead of tx.origin
             require(tx.origin == owner);
+            // This will report a warning
             dest.transfer(amount);
         }
     }

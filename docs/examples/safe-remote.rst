@@ -97,6 +97,7 @@ you can use state machine-like constructs inside a contract.
             // reentrancy-safe, because it is the
             // last call in this function and we
             // already changed the state.
+            // This will report a warning.
             seller.transfer(address(this).balance);
         }
 
@@ -128,6 +129,7 @@ you can use state machine-like constructs inside a contract.
             // can call in again here.
             state = State.Release;
 
+            // This will report a warning
             buyer.transfer(value);
         }
 
@@ -144,6 +146,7 @@ you can use state machine-like constructs inside a contract.
             // can call in again here.
             state = State.Inactive;
 
+            // This will report a warning
             seller.transfer(3 * value);
         }
     }

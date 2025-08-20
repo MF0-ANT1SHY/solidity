@@ -440,6 +440,7 @@ operations as long as there is enough gas passed on to it.
 
             // If someone sends Ether to that contract,
             // the transfer will fail, i.e. this returns false here.
+            // This will report a warning
             return testPayable.send(2 ether);
         }
 

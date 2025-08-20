@@ -392,6 +392,7 @@ and the ``override`` keyword must be used in the overriding modifier:
 
     contract Base
     {
+        // This will report a warning
         modifier foo() virtual {_;}
     }
 
@@ -411,11 +412,13 @@ explicitly:
 
     contract Base1
     {
+        // This will report a warning
         modifier foo() virtual {_;}
     }
 
     contract Base2
     {
+        // This will report a warning
         modifier foo() virtual {_;}
     }
 

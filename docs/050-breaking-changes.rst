@@ -501,6 +501,7 @@ New version:
             // To increase clarity, we suggest the use of a library for
             // the conversion (provided after the contract in this example).
             address payable addr = unknownContract.makePayable();
+            // This will report a warning
             require(addr.send(1 ether));
 
             // Since uint32 (4 bytes) is smaller than bytes8 (8 bytes),

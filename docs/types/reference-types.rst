@@ -729,6 +729,7 @@ shown in the following example:
                 return false;
             uint amount = c.amount;
             c.amount = 0;
+            // This will report a warning
             c.beneficiary.transfer(amount);
             return true;
         }

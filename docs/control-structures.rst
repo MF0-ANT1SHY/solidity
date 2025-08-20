@@ -698,6 +698,7 @@ and ``assert`` for internal error checking.
         function sendHalf(address payable addr) public payable returns (uint balance) {
             require(msg.value % 2 == 0, "Even value required.");
             uint balanceBeforeTransfer = address(this).balance;
+            // This will report a warning
             addr.transfer(msg.value / 2);
             // Since transfer throws an exception on failure and
             // cannot call back here, there should be no way for us to
@@ -775,6 +776,7 @@ together with ``revert`` and the equivalent ``require``:
             if (msg.sender != owner)
                 revert Unauthorized();
 
+            // This will report a warning
             payable(msg.sender).transfer(address(this).balance);
         }
     }

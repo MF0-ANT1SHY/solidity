@@ -185,6 +185,7 @@ The full contract
             // this recreates the message that was signed on the client
             bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
             require(recoverSigner(message, signature) == owner);
+            // This will report a warning
             payable(msg.sender).transfer(amount);
         }
 
@@ -195,6 +196,7 @@ The full contract
         {
             require(msg.sender == owner);
             freeze();
+            // This will report a warning
             payable(msg.sender).transfer(address(this).balance);
         }
 
@@ -406,8 +408,10 @@ The full contract
             require(msg.sender == recipient);
             require(isValidSignature(amount, signature));
 
+            // This will report a warning
             recipient.transfer(amount);
             freeze();
+            // This will report a warning
             sender.transfer(address(this).balance);
         }
 
@@ -430,6 +434,7 @@ The full contract
         {
             require(block.timestamp >= expiration);
             freeze();
+            // This will report a warning
             sender.transfer(address(this).balance);
         }
 
