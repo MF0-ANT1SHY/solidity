@@ -427,6 +427,8 @@ explicitly:
         modifier foo() override(Base1, Base2) {_;}
     }
 
+.. warning::
+    virtual modifiers will be deprecated in the next breaking version (0.9).
 
 
 .. index:: ! constructor

@@ -261,6 +261,9 @@ reverts on failure.
 .. note::
     If ``x`` is a contract address, its code (more specifically: its :ref:`receive-ether-function`, if present, or otherwise its :ref:`fallback-function`, if present) will be executed together with the ``transfer`` call (this is a feature of the EVM and cannot be prevented). If that execution runs out of gas or fails in any way, the Ether transfer will be reverted and the current contract will stop with an exception.
 
+.. warning::
+    ``transfer`` will be deprecated in the next breaking version (0.9).
+
 * ``send``
 
 ``send`` is the low-level counterpart of ``transfer``. If the execution fails, the current contract will not stop with an exception, but ``send`` will return ``false``.
@@ -270,6 +273,7 @@ reverts on failure.
     (this can always be forced by the caller) and it also fails if the recipient runs out of gas. So in order
     to make safe Ether transfers, always check the return value of ``send``, use ``transfer`` or even better:
     use a pattern where the recipient withdraws the Ether.
+    Please, be aware that ``send`` will be deprecated in the next breaking version (0.9).
 
 * ``call``, ``delegatecall`` and ``staticcall``
 

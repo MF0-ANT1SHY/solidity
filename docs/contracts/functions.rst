@@ -318,6 +318,7 @@ will consume more gas than the 2300 gas stipend:
     you have to implement a receive Ether function (using payable fallback functions for receiving Ether is
     not recommended, since the fallback is invoked and would not fail for interface confusions
     on the part of the sender).
+    Note that ``send`` and ``transfer`` are scheduled to be deprecated in the next breaking version (0.9).
 
 
 .. warning::
