@@ -1,3 +1,9 @@
+Warning: transfer will be deprecated in the next breaking version.
+  --> input.sol:10:3:
+   |
+10 | 		a.transfer(x);
+   | 		^^^^^^^^^^
+
 Warning: BMC: Underflow (resulting value less than 0) happens here.
  --> input.sol:7:3:
   |

@@ -1,3 +1,9 @@
+Warning: transfer will be deprecated in the next breaking version.
+  --> input.sol:10:3:
+   |
+10 | 		a.transfer(x);
+   | 		^^^^^^^^^^
+
 Warning: BMC: Overflow (resulting value larger than 2**256 - 1) happens here.
  --> input.sol:8:3:
   |
