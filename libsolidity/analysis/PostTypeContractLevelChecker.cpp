@@ -102,9 +102,11 @@ void PostTypeContractLevelChecker::checkStorageLayoutSpecifier(ContractDefinitio
 	}
 
 	auto const* baseSlotExpressionType = type(baseSlotExpression);
+	auto const* integerType = dynamic_cast<IntegerType const*>(baseSlotExpressionType);
+	auto const* rationalType = dynamic_cast<RationalNumberType const*>(baseSlotExpressionType);
 	if (
-		!dynamic_cast<IntegerType const*>(baseSlotExpressionType) &&
-		!dynamic_cast<RationalNumberType const*>(baseSlotExpressionType)
+		!integerType &&
+		!rationalType
 	)
 	{
 		m_errorReporter.typeError(
@@ -116,7 +118,7 @@ void PostTypeContractLevelChecker::checkStorageLayoutSpecifier(ContractDefinitio
 	}
 
 	rational baseSlotRationalValue;
-	if (auto const integerType = dynamic_cast<IntegerType const*>(baseSlotExpressionType))
+	if (integerType)
 	{
 		std::optional<ConstantEvaluator::TypedRational> typedRational = ConstantEvaluator::evaluate(m_errorReporter, baseSlotExpression);
 		if (!typedRational)
@@ -133,7 +135,6 @@ void PostTypeContractLevelChecker::checkStorageLayoutSpecifier(ContractDefinitio
 	}
 	else
 	{
-		auto const* rationalType = dynamic_cast<RationalNumberType const*>(baseSlotExpressionType);
 		solAssert(rationalType);
 		if (rationalType->isFractional())
 		{
