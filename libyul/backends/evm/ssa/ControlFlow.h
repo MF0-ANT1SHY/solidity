@@ -27,6 +27,11 @@
 namespace solidity::yul::ssa
 {
 
+namespace ssa
+{
+struct SSACFGStackLayout;
+}
+
 struct ControlFlow;
 
 struct ControlFlowLiveness{
@@ -36,7 +41,7 @@ struct ControlFlowLiveness{
 	std::unique_ptr<LivenessAnalysis> mainLiveness;
 	std::vector<std::unique_ptr<LivenessAnalysis>> functionLiveness;
 
-	std::string toDot() const;
+	std::string toDot(ssa::SSACFGStackLayout const* _stackLayout) const;
 };
 
 struct ControlFlow
@@ -53,19 +58,20 @@ struct ControlFlow
 		return nullptr;
 	}
 
-	std::string toDot(ControlFlowLiveness const* _liveness=nullptr) const
+	std::string toDot(ControlFlowLiveness const* _liveness=nullptr, ssa::SSACFGStackLayout const* _stackLayout = nullptr) const
 	{
 		if (_liveness)
 			yulAssert(&_liveness->controlFlow.get() == this);
 		std::ostringstream output;
 		output << "digraph SSACFG {\nnodesep=0.7;\ngraph[rankdir=LR, fontname=\"DejaVu Sans\"]\nnode[shape=box,fontname=\"DejaVu Sans\"];\n\n";
-		output << mainGraph->toDot(false, std::nullopt, _liveness ? _liveness->mainLiveness.get() : nullptr);
+		output << mainGraph->toDot(false, std::nullopt, _liveness ? _liveness->mainLiveness.get() : nullptr, _stackLayout);
 
 		for (size_t index=0; index < functionGraphs.size(); ++index)
 			output << functionGraphs[index]->toDot(
 				false,
 				index+1,
-				_liveness ? _liveness->functionLiveness[index].get() : nullptr
+				_liveness ? _liveness->functionLiveness[index].get() : nullptr,
+				_stackLayout
 			);
 
 		output << "}\n";
