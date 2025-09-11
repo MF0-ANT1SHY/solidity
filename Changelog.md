@@ -3,7 +3,7 @@
 Language Features:
 
 Compiler Features:
-* Custom Storage Layout: The base slot expression can also be specified by constant variables.
+* Custom Storage Layout: Allow using `constant` state variables in the base slot expression.
 * ethdebug: Experimental support for instructions and source locations under EOF.
 
 
