@@ -109,10 +109,20 @@ void PostTypeContractLevelChecker::checkStorageLayoutSpecifier(ContractDefinitio
 		!rationalType
 	)
 	{
+		std::string errorMsg = "The base slot of the storage layout must evaluate to an integer.";
+		if (dynamic_cast<AddressType const*>(baseSlotExpressionType))
+			errorMsg += " The type of the supplied expression is address.";
+		else if (auto const* fixedBytesType = dynamic_cast<FixedBytesType const*>(baseSlotExpressionType))
+			errorMsg += fmt::format(
+				" The type of the supplied expression is bytes{}.",
+				fixedBytesType->numBytes()
+				)
+			;
+
 		m_errorReporter.typeError(
-			6396_error,
+			1763_error,
 			baseSlotExpression.location(),
-			"The base slot of the storage layout must evaluate to an integer number."
+			errorMsg
 		);
 		return;
 	}
@@ -139,7 +149,7 @@ void PostTypeContractLevelChecker::checkStorageLayoutSpecifier(ContractDefinitio
 		if (rationalType->isFractional())
 		{
 			m_errorReporter.typeError(
-				1763_error,
+				ErrorId{1763},
 				baseSlotExpression.location(),
 				"The base slot of the storage layout must evaluate to an integer."
 			);
