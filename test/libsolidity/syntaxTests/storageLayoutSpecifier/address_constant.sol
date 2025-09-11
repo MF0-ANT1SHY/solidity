@@ -3,4 +3,4 @@ contract C layout at x {
 
 }
 // ----
-// TypeError 6396: (86-87): The base slot of the storage layout must evaluate to an integer number.
+// TypeError 1763: (86-87): The base slot of the storage layout must evaluate to an integer. The type of the supplied expression is address.

@@ -1,6 +1,6 @@
-bytes32 constant x = "ABC";
-contract A layout at x {}
-contract C layout at x[1] {}
+bytes32 constant CONST1 = "12345";
+contract A layout at CONST1 {}
+contract C layout at CONST1[1] {}
 // ----
-// TypeError 6396: (49-50): The base slot of the storage layout must evaluate to an integer number.
-// TypeError 6396: (75-79): The base slot of the storage layout must evaluate to an integer number.
+// TypeError 1763: (56-62): The base slot of the storage layout must evaluate to an integer. The type of the supplied expression is bytes32.
+// TypeError 1763: (87-96): The base slot of the storage layout must evaluate to an integer. The type of the supplied expression is bytes1.
