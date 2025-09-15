@@ -66,6 +66,10 @@ private:
 	/// without a block.
 	void checkSingleStatementVariableDeclaration(ASTNode const& _statement);
 
+	/// Reports a warning if the declaration name is scheduled to be
+	/// promoted to a keyword in the near future.
+	void checkFutureKeyword(Declaration const& _declaration);
+
 	bool visit(IfStatement const& _ifStatement) override;
 	bool visit(WhileStatement const& _whileStatement) override;
 	void endVisit(WhileStatement const& _whileStatement) override;

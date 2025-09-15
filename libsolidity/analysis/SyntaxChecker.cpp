@@ -391,6 +391,9 @@ bool SyntaxChecker::visit(ContractDefinition const& _contract)
 				"Functions are not allowed to have the same name as the contract. "
 				"If you intend this to be a constructor, use \"constructor(...) { ... }\" to define it."
 			);
+
+	checkFutureKeyword(_contract);
+
 	return true;
 }
 
@@ -477,6 +480,8 @@ bool SyntaxChecker::visit(FunctionDefinition const& _function)
 	else if (!_function.isImplemented() && !_function.modifiers().empty())
 		m_errorReporter.syntaxError(2668_error, _function.location(), "Functions without implementation cannot have modifiers.");
 
+	checkFutureKeyword(_function);
+
 	return true;
 }
 
@@ -508,5 +513,31 @@ bool SyntaxChecker::visitNode(ASTNode const& _node)
 		solAssert(m_sourceUnit);
 		solAssert(m_sourceUnit->experimentalSolidity());
 	}
+	auto const* declaration = dynamic_cast<Declaration const*>(&_node);
+	if (declaration)
+		checkFutureKeyword(*declaration);
 	return ASTConstVisitor::visitNode(_node);
+}
+
+
+void SyntaxChecker::checkFutureKeyword(Declaration const& _declaration)
+{
+	std::set<ASTString> const futureKeywords = {
+		"transient",
+		"layout",
+		"at",
+		"error",
+		"super",
+		"this"
+	};
+		if (futureKeywords.count(_declaration.name()))
+		m_errorReporter.warning(
+			6335_error,
+			_declaration.location(),
+			fmt::format(
+				"\"{}\" will be promoted to reserved keyword in the next breaking version"
+				" and will not be allowed as an identifier anymore.",
+				_declaration.name()
+			)
+		);
 }
