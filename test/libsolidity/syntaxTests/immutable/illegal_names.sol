@@ -4,6 +4,8 @@ contract C {
     uint immutable this;
 }
 // ----
+// Warning 6335: (17-37): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (65-84): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
 // DeclarationError 3726: (17-37): The name "super" is reserved.
 // DeclarationError 3726: (43-59): The name "_" is reserved.
 // DeclarationError 3726: (65-84): The name "this" is reserved.

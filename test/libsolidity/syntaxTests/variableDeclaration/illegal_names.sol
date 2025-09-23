@@ -12,6 +12,12 @@ contract D {
 	struct _ { uint super; }
 }
 // ----
+// Warning 6335: (0-22): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (24-47): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (84-96): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (99-108): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (160-174): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (188-198): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
 // DeclarationError 3726: (0-22): The name "this" is reserved.
 // DeclarationError 3726: (24-47): The name "super" is reserved.
 // DeclarationError 3726: (49-68): The name "_" is reserved.

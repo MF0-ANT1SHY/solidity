@@ -10,6 +10,8 @@ contract C {
 	}
 }
 // ----
+// Warning 6335: (0-18): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (19-38): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
 // DeclarationError 3726: (0-18): The name "this" is reserved.
 // DeclarationError 3726: (19-38): The name "super" is reserved.
 // DeclarationError 3726: (39-54): The name "_" is reserved.

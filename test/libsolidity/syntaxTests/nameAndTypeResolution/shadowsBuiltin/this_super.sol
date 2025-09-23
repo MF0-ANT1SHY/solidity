@@ -5,6 +5,8 @@ contract C {
     }
 }
 // ----
+// Warning 6335: (52-62): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (76-85): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
 // DeclarationError 3726: (52-62): The name "super" is reserved.
 // DeclarationError 3726: (76-85): The name "this" is reserved.
 // Warning 2319: (52-62): This declaration shadows a builtin symbol.

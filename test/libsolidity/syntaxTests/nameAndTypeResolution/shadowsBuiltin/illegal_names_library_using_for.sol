@@ -19,6 +19,8 @@ contract C {
     using _ for int;
 }
 // ----
+// Warning 6335: (0-49): "super" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
+// Warning 6335: (51-99): "this" will be promoted to reserved keyword in the next breaking version and will not be allowed as an identifier anymore.
 // DeclarationError 3726: (0-49): The name "super" is reserved.
 // DeclarationError 3726: (51-99): The name "this" is reserved.
 // DeclarationError 3726: (100-145): The name "_" is reserved.
