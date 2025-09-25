@@ -266,10 +266,9 @@ public:
 	std::string storageArrayPushZeroFunction(ArrayType const& _type);
 
 	/// @returns the name of a function that will clear the storage area given
-	/// by the start and end (exclusive) parameters (slots).
-	/// signature: (start, end)
-	/// if _canOverflow is true, it treats the storage as circular and clears by wrapping around.
-	std::string clearStorageRangeFunction(Type const& _type, bool _canOverflow);
+	/// by the start position and number of items to clear.
+	/// signature: (start, itemCount)
+	std::string clearStorageRangeFunction(Type const& _type);
 
 	/// @returns the name of a function that will clear the given storage array
 	/// signature: (slot) ->

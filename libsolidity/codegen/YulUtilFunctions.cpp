@@ -1415,23 +1415,21 @@ std::string YulUtilFunctions::cleanUpStorageArrayEndFunction(ArrayType const& _t
 		return Whiskers(R"(
 			if lt(startIndex, len) {
 				// Size was reduced, clear end of array
-				let oldSlotCount := <convertToSize>(len)
 				let newSlotCount := <convertToSize>(startIndex)
 				let arrayDataStart := <dataPosition>(array)
 				let deleteStart := add(arrayDataStart, newSlotCount)
-				let deleteEnd := add(arrayDataStart, oldSlotCount)
 				<?packed>
 					// if we are dealing with packed array and offset is greater than zero
 					// we have  to partially clear last slot that is still used, so decreasing start by one
 					let offset := mul(mod(startIndex, <itemsPerSlot>), <storageBytes>)
 					if gt(offset, 0) { <partialClearStorageSlot>(sub(deleteStart, 1), offset) }
 				</packed>
-				<clearStorageRange>(deleteStart, deleteEnd)
+				<clearStorageRange>(deleteStart, sub(len, startIndex))
 			}
 		)")
 		("convertToSize", arrayConvertLengthToSize(_type))
 		("dataPosition", arrayDataAreaFunction(_type))
-		("clearStorageRange", clearStorageRangeFunction(*_type.baseType(), !_type.isDynamicallySized()))
+		("clearStorageRange", clearStorageRangeFunction(*_type.baseType()))
 		("packed", _type.baseType()->storageBytes() <= 16)
 		("itemsPerSlot", std::to_string(32 / _type.baseType()->storageBytes()))
 		("storageBytes", std::to_string(_type.baseType()->storageBytes()))
@@ -1474,16 +1472,18 @@ std::string YulUtilFunctions::cleanUpDynamicByteArrayEndSlotsFunction(ArrayType 
 		_args = {"array", "len", "startIndex"};
 		return Whiskers(R"(
 			if gt(len, 31) {
-				let dataArea := <dataLocation>(array)
-				let deleteStart := add(dataArea, <div32Ceil>(startIndex))
-				// If we are clearing array to be short byte array, we want to clear only data starting from array data area.
-				if lt(startIndex, 32) { deleteStart := dataArea }
-				<clearStorageRange>(deleteStart, add(dataArea, <div32Ceil>(len)))
+				if gt(len, startIndex) {
+					let dataArea := <dataLocation>(array)
+					let deleteStart := add(dataArea, <div32Ceil>(startIndex))
+					// If we are clearing array to be short byte array, we want to clear only data starting from array data area.
+					if lt(startIndex, 32) { deleteStart := dataArea }
+					<clearStorageRange>(deleteStart, sub(len, startIndex))
+				}
 			}
 		)")
 		("dataLocation", arrayDataAreaFunction(_type))
 		("div32Ceil", divide32CeilFunction())
-		("clearStorageRange", clearStorageRangeFunction(*_type.baseType(), /* _canOverflow */ false))
+		("clearStorageRange", clearStorageRangeFunction(*_type.baseType()))
 		.render();
 	});
 }
@@ -1503,7 +1503,7 @@ std::string YulUtilFunctions::decreaseByteArraySizeFunction(ArrayType const& _ty
 					let offset := and(newLen, 0x1f)
 					if offset { <partialClearStorageSlot>(sub(deleteStart, 1), offset) }
 
-					<clearStorageRange>(deleteStart, add(arrayDataStart, <div32Ceil>(oldLen)))
+					<clearStorageRange>(deleteStart, sub(oldLen, newLen))
 
 					sstore(array, or(mul(2, newLen), 1))
 				}
@@ -1512,7 +1512,7 @@ std::string YulUtilFunctions::decreaseByteArraySizeFunction(ArrayType const& _ty
 					case 1 {
 						let arrayDataStart := <dataPosition>(array)
 						// clear whole old array, as we are transforming to short bytes array
-						<clearStorageRange>(add(arrayDataStart, 1), add(arrayDataStart, <div32Ceil>(oldLen)))
+						<clearStorageRange>(add(arrayDataStart, 1), oldLen)
 						<transitLongToShort>(array, newLen)
 					}
 					default {
@@ -1523,7 +1523,7 @@ std::string YulUtilFunctions::decreaseByteArraySizeFunction(ArrayType const& _ty
 			("functionName", functionName)
 			("dataPosition", arrayDataAreaFunction(_type))
 			("partialClearStorageSlot", partialClearStorageSlotFunction())
-			("clearStorageRange", clearStorageRangeFunction(*_type.baseType(), !_type.isDynamicallySized()))
+			("clearStorageRange", clearStorageRangeFunction(*_type.baseType()))
 			("transitLongToShort", byteArrayTransitLongToShortFunction(_type))
 			("div32Ceil", divide32CeilFunction())
 			("encodeUsedSetLen", shortByteArrayEncodeUsedAreaSetLengthFunction())
@@ -1817,23 +1817,22 @@ std::string YulUtilFunctions::partialClearStorageSlotFunction()
 	});
 }
 
-std::string YulUtilFunctions::clearStorageRangeFunction(Type const& _type, bool _canOverflow)
+std::string YulUtilFunctions::clearStorageRangeFunction(Type const& _type)
 {
 	if (_type.storageBytes() < 32)
 		solAssert(_type.isValueType(), "");
 
-	std::string functionName = "clear_storage_range_" + _type.identifier() + (_canOverflow ? "_canOverflow" : "_cannotOverflow");
+	std::string functionName = "clear_storage_range_" + _type.identifier();
 
 	return m_functionCollector.createFunction(functionName, [&]() {
 		return Whiskers(R"(
-			function <functionName>(start, end) {
-				for {} <compare>(start, end) { start := add(start, <increment>) } {
-					<setToZero>(start, 0)
+			function <functionName>(start, itemCount) {
+				for { let i := 0 } lt(i, itemCount) { i := add(i, 1) } {
+					<setToZero>(add(start, mul(i, <increment>)), 0)
 				}
 			}
 		)")
 		("functionName", functionName)
-		("compare", _canOverflow ? "sub" : "lt")
 		("setToZero", storageSetToZeroFunction(_type.storageBytes() < 32 ? *TypeProvider::uint256() : _type, VariableDeclaration::Location::Unspecified))
 		("increment", _type.storageSize().str())
 		.render();
@@ -1861,7 +1860,7 @@ std::string YulUtilFunctions::clearStorageArrayFunction(ArrayType const& _type)
 				<?dynamic>
 					<resizeArray>(slot, 0)
 				<!dynamic>
-					<?+clearRange><clearRange>(slot, add(slot, <lenToSize>(<len>)))</+clearRange>
+					<?+clearRange><clearRange>(slot, <lenToSize>(<len>))</+clearRange>
 				</dynamic>
 			}
 		)")
@@ -1871,7 +1870,7 @@ std::string YulUtilFunctions::clearStorageArrayFunction(ArrayType const& _type)
 		(
 			"clearRange",
 			_type.baseType()->category() != Type::Category::Mapping ?
-			clearStorageRangeFunction((_type.baseType()->storageBytes() < 32) ? *TypeProvider::uint256() : *_type.baseType(), /* _canOverflow */ true) :
+			clearStorageRangeFunction((_type.baseType()->storageBytes() < 32) ? *TypeProvider::uint256() : *_type.baseType()) :
 			""
 		)
 		("lenToSize", arrayConvertLengthToSize(_type))

@@ -105,7 +105,8 @@ SemanticTest::SemanticTest(
 	if (!util::contains(compileViaYulAllowedValues, compileViaYul))
 		BOOST_THROW_EXCEPTION(std::runtime_error("Invalid compileViaYul value: " + compileViaYul + "."));
 	m_testCaseWantsYulRun = util::contains(yulRunTriggers, compileViaYul);
-	m_testCaseWantsLegacyRun = util::contains(legacyRunTriggers, compileViaYul);
+	//m_testCaseWantsLegacyRun = util::contains(legacyRunTriggers, compileViaYul);
+	m_testCaseWantsLegacyRun = false; // disable legacy run for now
 
 	auto revertStrings = revertStringsFromString(m_reader.stringSetting("revertStrings", "default"));
 	soltestAssert(revertStrings, "Invalid revertStrings setting.");
