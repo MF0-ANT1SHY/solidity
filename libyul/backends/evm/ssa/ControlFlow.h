@@ -41,7 +41,7 @@ struct ControlFlowLiveness{
 	std::unique_ptr<LivenessAnalysis> mainLiveness;
 	std::vector<std::unique_ptr<LivenessAnalysis>> functionLiveness;
 
-	std::string toDot(ssa::SSACFGStackLayout const* _stackLayout) const;
+	std::string toDot(SSACFGStackLayout const* _stackLayout) const;
 };
 
 struct ControlFlow
@@ -58,7 +58,7 @@ struct ControlFlow
 		return nullptr;
 	}
 
-	std::string toDot(ControlFlowLiveness const* _liveness=nullptr, ssa::SSACFGStackLayout const* _stackLayout = nullptr) const
+	std::string toDot(ControlFlowLiveness const* _liveness=nullptr, SSACFGStackLayout const* _stackLayout = nullptr) const
 	{
 		if (_liveness)
 			yulAssert(&_liveness->controlFlow.get() == this);
