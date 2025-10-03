@@ -298,6 +298,7 @@ void AsmAnalyzer::operator()(VariableDeclaration const& _varDecl)
 	for (auto const& variable: _varDecl.variables)
 	{
 		expectValidIdentifier(variable.name, nativeLocationOf(variable));
+		checkFutureReservedKeyword(variable.name, nativeLocationOf(variable));
 	}
 
 	if (_varDecl.value)
@@ -326,6 +327,7 @@ void AsmAnalyzer::operator()(FunctionDefinition const& _funDef)
 {
 	yulAssert(!_funDef.name.empty());
 	expectValidIdentifier(_funDef.name, nativeLocationOf(_funDef));
+	checkFutureReservedKeyword(_funDef.name, nativeLocationOf(_funDef));
 	Block const* virtualBlock = m_info.virtualBlocks.at(&_funDef).get();
 	yulAssert(virtualBlock, "");
 	Scope& varScope = scope(virtualBlock);
@@ -950,4 +952,31 @@ void AsmAnalyzer::validateObjectStructure(langutil::SourceLocation const& _astRo
 			);
 		}
 	}
+}
+
+void AsmAnalyzer::checkFutureReservedKeyword(YulName _identifier, langutil::SourceLocation const& _location)
+{
+	std::set<std::string> futureReservedKeywords{"leave"};
+	if (m_evmVersion < langutil::EVMVersion::london())
+		futureReservedKeywords.insert("basefee");
+	if (m_evmVersion < langutil::EVMVersion::paris())
+		futureReservedKeywords.insert("prevrandao");
+	if (m_evmVersion < langutil::EVMVersion::cancun())
+	{
+		futureReservedKeywords.insert("blobbasefee");
+		futureReservedKeywords.insert("blobhash");
+		futureReservedKeywords.insert("mcopy");
+		futureReservedKeywords.insert("tstore");
+		futureReservedKeywords.insert("tload");
+	}
+	if (futureReservedKeywords.count(_identifier.str()))
+		m_errorReporter.warning(
+			5470_error,
+			_location,
+			fmt::format(
+				"\"{}\" will be promoted to reserved keyword in the next breaking version "
+				"and will not be allowed anymore as an identifier.",
+				_identifier.str()
+			)
+		);
 }
