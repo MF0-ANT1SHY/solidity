@@ -18,7 +18,7 @@
 
 #include <libyul/backends/evm/ssa/SSACFG.h>
 
-#include <libyul/backends/evm/SSACFGJunkBlockFinder.h>
+#include <libyul/backends/evm/ssa/TerminationPathAnalysis.h>
 #include <libyul/backends/evm/ssa/LivenessAnalysis.h>
 #include <libyul/backends/evm/SSACFGStackLayout.h>
 
@@ -46,14 +46,14 @@ public:
 		m_cfg(_cfg), m_functionIndex(0), m_liveness(_liveness), m_stackLayout(_stackLayout)
 	{
 		if (_liveness)
-			m_cfgRevertPaths = std::make_unique<SSACFGJunkBlockFinder>(_cfg, _liveness->topologicalSort());
+			m_cfgRevertPaths = std::make_unique<TerminationPathAnalysis>(_cfg, _liveness->topologicalSort());
 		printBlock(_blockId);
 	}
 	SSACFGPrinter(SSACFG const& _cfg, size_t _functionIndex, Scope::Function const& _function, LivenessAnalysis const* _liveness, ssa::SSACFGStackLayout const* _stackLayout):
 		m_cfg(_cfg), m_functionIndex(_functionIndex), m_liveness(_liveness), m_stackLayout(_stackLayout)
 	{
 		if (_liveness)
-			m_cfgRevertPaths = std::make_unique<SSACFGJunkBlockFinder>(_cfg, _liveness->topologicalSort());
+			m_cfgRevertPaths = std::make_unique<TerminationPathAnalysis>(_cfg, _liveness->topologicalSort());
 		printFunction(_function);
 	}
 	friend std::ostream& operator<<(std::ostream& stream, SSACFGPrinter const& printer) {
@@ -316,7 +316,7 @@ private:
 	}
 
 	SSACFG const& m_cfg;
-	std::unique_ptr<SSACFGJunkBlockFinder> m_cfgRevertPaths;
+	std::unique_ptr<TerminationPathAnalysis> m_cfgRevertPaths;
 	size_t m_functionIndex;
 	LivenessAnalysis const* m_liveness;
 	SSACFGStackLayout const* m_stackLayout;
