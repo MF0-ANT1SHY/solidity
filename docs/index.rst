@@ -149,6 +149,7 @@ Contents
    internals/layout_in_calldata.rst
    internals/variable_cleanup.rst
    internals/source_mappings.rst
+   internals/srcmap_workflow_analysis.rst
    internals/optimizer.rst
    metadata.rst
    abi-spec.rst
