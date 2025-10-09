@@ -379,7 +379,6 @@ private:
 
 			if (_targetState.numSlot(JunkSlot{}) > _state.numSlot(JunkSlot{}))
 			{
-				size_t n = 0;
 				for (size_t i = 0; i < _state.stackData.size(); ++i)
 				{
 					// if we have too much of it, we may declare it junk
@@ -391,7 +390,6 @@ private:
 						state.histogram[_state.stackData[i]] -= 1;
 						std::get<1>(result.back()).apply(stack);
 						state.histogram[JunkSlot{}] += 1;
-						++n;
 					}
 				}
 			}
