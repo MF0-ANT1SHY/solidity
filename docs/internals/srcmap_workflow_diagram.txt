@@ -1,0 +1,302 @@
+SOURCE MAPPING (SRCMAP) DEBUG INFO WORKFLOW - VISUAL DIAGRAM
+=============================================================
+
+This diagram shows the complete flow of source mapping information through the Solidity compiler.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        STAGE 1: PARSING & AST GENERATION                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Solidity Source Code (.sol)
+         │
+         │ [Parser reads & tokenizes]
+         ↓
+  ┌─────────────────┐
+  │   AST Nodes     │  Each node has:
+  │  ┌───────────┐  │  - ASTNode::location()
+  │  │ Contract  │  │    - start: byte offset
+  │  │ Function  │  │    - end: byte offset
+  │  │ Statement │  │    - sourceName: file name
+  │  │ Expression│  │
+  │  └───────────┘  │  Example: start=42, end=65, sourceName="contract.sol"
+  └─────────────────┘
+         │
+         │ Source indices map created:
+         │ {"contract.sol" → 0, "lib.sol" → 1, ...}
+         ↓
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    STAGE 2: SOURCE LOCATION TRACKING                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────┐
+  │   DebugData      │  Wrapper for source info:
+  │  ┌────────────┐  │  - nativeLocation (Yul position)
+  │  │Native Loc  │  │  - originLocation (Solidity position)
+  │  │Origin Loc  │  │  - astID (AST node ID)
+  │  │AST ID      │  │
+  │  └────────────┘  │
+  └──────────────────┘
+         │
+         ↓
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        STAGE 3: CODE GENERATION                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+         ┌─────────────────────────────────────┐
+         │   Which compilation path?           │
+         └─────────────────────────────────────┘
+                  │                    │
+         ┌────────┴────────┐  ┌────────┴────────┐
+         │   LEGACY PATH   │  │    IR PATH      │
+         │  (Direct EVM)   │  │  (via Yul)      │
+         └────────┬────────┘  └────────┬────────┘
+                  │                    │
+                  ↓                    ↓
+         ┌──────────────────┐  ┌──────────────────┐
+         │ ContractCompiler │  │   IRGenerator    │
+         │ ExpressionComp.  │  │   (AST → Yul)    │
+         └────────┬─────────┘  └────────┬─────────┘
+                  │                     │
+                  │ setSourceLocation() │ originLocation preserved
+                  │ on each visit       │ in Yul annotations
+                  ↓                     ↓
+         ┌──────────────────┐  ┌──────────────────┐
+         │ CompilerContext  │  │    Yul AST       │
+         │ - m_visitedNodes │  │  with origins    │
+         │ - m_asm          │  │                  │
+         └────────┬─────────┘  └────────┬─────────┘
+                  │                     │
+                  │                     │ [Yul Optimizer]
+                  │                     │ (preserves debug info)
+                  │                     ↓
+                  │            ┌──────────────────┐
+                  │            │ EVMCodeTransform │
+                  │            │ (Yul → Assembly) │
+                  │            └────────┬─────────┘
+                  │                     │
+                  │                     │ setSourceLocation()
+                  │                     │ via originLocationOf()
+                  └─────────┬───────────┘
+                            ↓
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    STAGE 4: ASSEMBLY ITEM GENERATION                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+         ┌──────────────────────────────────────┐
+         │          Assembly Object             │
+         │  ┌────────────────────────────────┐  │
+         │  │ m_currentSourceLocation        │  │ Active location context
+         │  │ m_currentModifierDepth         │  │ Current modifier nesting
+         │  └────────────────────────────────┘  │
+         │                                      │
+         │  Assembly::append(AssemblyItem)      │
+         │         │                            │
+         │         ↓                            │
+         │  ┌────────────────────────────────┐  │
+         │  │      AssemblyItem              │  │
+         │  │  ┌──────────────────────────┐  │  │
+         │  │  │ m_type (Operation/Push)  │  │  │
+         │  │  │ m_debugData              │──┼──┼──→ Contains SourceLocation
+         │  │  │   - location             │  │  │
+         │  │  │ m_modifierDepth          │  │  │
+         │  │  │ m_jumpType               │  │  │
+         │  │  └──────────────────────────┘  │  │
+         │  └────────────────────────────────┘  │
+         │                                      │
+         │  [Assembly Optimizers preserve       │
+         │   source info through all passes]    │
+         └──────────────────────────────────────┘
+                         │
+                         ↓
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      STAGE 5: ASSEMBLY TO BYTECODE                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Assembly::assemble()
+         │
+         ├──→ For each AssemblyItem:
+         │      - Convert to bytecode
+         │      - Calculate byte positions
+         │      - Resolve tags/jumps
+         │
+         ↓
+  ┌──────────────────────────────────┐
+  │      LinkerObject                │
+  │  ┌────────────────────────────┐  │
+  │  │ bytecode: [60 80 60 40 ...] │  │  Raw EVM bytecode
+  │  │ linkReferences: {...}       │  │  Library links
+  │  │ immutableReferences: {...}  │  │  Immutable positions
+  │  └────────────────────────────┘  │
+  └──────────────────────────────────┘
+         │
+         │ [AssemblyItems preserved for mapping]
+         ↓
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                  STAGE 6: SOURCE MAPPING COMPUTATION                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  AssemblyItem::computeSourceMapping(items, sourceIndices)
+         │
+         │ For each AssemblyItem:
+         ├──→ Extract from DebugData:
+         │      s = location.start
+         │      l = location.end - location.start
+         │      f = sourceIndices[location.sourceName]
+         │      j = jumpType ('i'/'o'/'-')
+         │      m = modifierDepth
+         │
+         ├──→ Compare with previous:
+         │      If unchanged, omit field
+         │      Apply compression rules
+         │
+         ├──→ Format: "s:l:f:j:m"
+         │      Handle multi-byte instructions
+         │
+         └──→ Concatenate with ";"
+         │
+         ↓
+  
+  Example Output:
+  ┌─────────────────────────────────────────────────┐
+  │ "0:23:0:-:0;5:18:0;;11:7:0;:5;;;18:3:0;:1"      │
+  │                                                 │
+  │ Breakdown:                                      │
+  │ - 0:23:0:-:0  → start=0, len=23, file=0,       │
+  │                 jump=regular, depth=0           │
+  │ - 5:18:0      → start=5, len=18, (rest same)   │
+  │ - ;           → (next instruction, all same)   │
+  │ - 11:7:0      → start=11, len=7, (rest same)   │
+  │ - :5          → len=5, (rest same)             │
+  │ - ;;          → (3 instructions, all same)     │
+  │ - 18:3:0      → start=18, len=3, (rest same)   │
+  │ - :1          → len=1, (rest same)             │
+  └─────────────────────────────────────────────────┘
+         │
+         ↓
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     STAGE 7: OUTPUT INTEGRATION                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  CompilerStack stores mappings:
+         │
+         ├──→ m_contracts[name].sourceMapping         (deployment code)
+         ├──→ m_contracts[name].runtimeSourceMapping  (runtime code)
+         │
+         ↓
+  
+  Standard JSON Output:
+  ┌─────────────────────────────────────────────────────────┐
+  │ {                                                       │
+  │   "contracts": {                                        │
+  │     "contract.sol": {                                   │
+  │       "MyContract": {                                   │
+  │         "evm": {                                        │
+  │           "bytecode": {                                 │
+  │             "object": "6080604052...",                  │
+  │             "sourceMap": "0:23:0:-:0;5:18:0;;..."  ←────┼── Deployment
+  │           },                                            │
+  │           "deployedBytecode": {                         │
+  │             "object": "6080604052...",                  │
+  │             "sourceMap": "42:156:0:-:0;..."        ←────┼── Runtime
+  │           }                                             │
+  │         }                                               │
+  │       }                                                 │
+  │     }                                                   │
+  │   }                                                     │
+  │ }                                                       │
+  └─────────────────────────────────────────────────────────┘
+         │
+         ↓
+  Used by: Debuggers, Coverage Tools, Analyzers, Profilers
+
+═══════════════════════════════════════════════════════════════════════════════
+
+KEY COMPONENTS & DATA FLOW
+
+┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+│  SourceLocation │──────→│    DebugData    │──────→│  AssemblyItem   │
+│  - start        │      │  - nativeLocation│      │  - m_debugData  │
+│  - end          │      │  - originLocation│      │  - m_jumpType   │
+│  - sourceName   │      │  - astID         │      │  - m_modDepth   │
+└─────────────────┘      └─────────────────┘      └─────────────────┘
+         │                        │                        │
+         │                        │                        │
+         ↓                        ↓                        ↓
+    Parsed from              Tracks during           Stores in each
+    source code              compilation              assembly item
+         │                        │                        │
+         └────────────────────────┴────────────────────────┘
+                                  │
+                                  ↓
+                    computeSourceMapping() extracts
+                           and compresses
+                                  │
+                                  ↓
+                         "s:l:f:j:m" string
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SPECIAL CASES
+
+1. MODIFIER DEPTH TRACKING
+   ┌───────────────────────────────┐
+   │ contract C {                  │
+   │   modifier m1 { _; }          │ depth=0
+   │   modifier m2 { m1 { _; } }   │ depth=1 (nested)
+   │   function f() m2 { ... }     │ depth changes tracked in mapping
+   │ }                             │
+   └───────────────────────────────┘
+
+2. JUMP TYPE CLASSIFICATION
+   ┌──────────────────────────────────────┐
+   │ Jump Type │ Marker │ Example         │
+   ├──────────────────────────────────────┤
+   │ Into      │   i    │ function call   │
+   │ Out       │   o    │ return          │
+   │ Regular   │   -    │ loop, if/else   │
+   └──────────────────────────────────────┘
+
+3. MULTI-BYTE INSTRUCTIONS
+   ┌──────────────────────────────────────┐
+   │ PUSH32 0x1234...                     │
+   │ → 1 instruction, 33 bytes            │
+   │ → 1 srcmap entry                     │
+   │ → opcodeCount() returns 33           │
+   │ → 32 extra ";" added in mapping      │
+   └──────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+COMPRESSION EXAMPLE
+
+Uncompressed (5 instructions):
+┌──────────────────────────────────────────────────────────────────┐
+│ Instr │  s  │  l  │  f  │  j  │  m  │ Full Format              │
+├──────────────────────────────────────────────────────────────────┤
+│   1   │ 100 │ 20  │  0  │  -  │  0  │ 100:20:0:-:0             │
+│   2   │ 100 │ 30  │  0  │  -  │  0  │ 100:30:0:-:0             │
+│   3   │ 105 │ 15  │  0  │  -  │  0  │ 105:15:0:-:0             │
+│   4   │ 105 │ 15  │  0  │  -  │  0  │ 105:15:0:-:0             │
+│   5   │ 120 │ 10  │  1  │  i  │  1  │ 120:10:1:i:1             │
+└──────────────────────────────────────────────────────────────────┘
+
+Compressed (same 5 instructions):
+┌────────────────────────────────────────────────┐
+│ 100:20:0:-:0;:30;;105:15:0;;;120:10:1:i:1     │
+│                                                │
+│ Explanation:                                   │
+│ - 100:20:0:-:0  → Full first entry             │
+│ - :30           → Only length changed          │
+│ - ;             → Nothing changed              │
+│ - 105:15:0      → Start/len/file changed       │
+│ - ;;            → 2 instructions same           │
+│ - 120:10:1:i:1  → All fields changed           │
+└────────────────────────────────────────────────┘
+
+Space savings: ~60 bytes → ~43 bytes (28% reduction)
