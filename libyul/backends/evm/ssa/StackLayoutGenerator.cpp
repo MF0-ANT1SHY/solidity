@@ -101,52 +101,6 @@ void reduceStackToLiveness(StackLayoutGenerator::StackType& _stack, std::set<SSA
 	}
 }
 
-void junkShuffler(StackLayoutGenerator::StackType& _stack)
-{
-	// goal is to have the junk in one block at the bottom
-	auto numJunk = ranges::count_if(_stack, [](auto const& _slot) { return std::holds_alternative<ssa::JunkSlot>(_slot); });
-	size_t i = 0;
-	while (numJunk > 0 && i < numJunk)
-	{
-		if (std::holds_alternative<ssa::JunkSlot>(_stack.data()[i]))
-		{
-			// we have a block of i junk slots at the bottom
-			++i;
-			continue;
-		}
-
-		if (std::holds_alternative<ssa::JunkSlot>(_stack.top()))
-		{
-			// todo it might be cheaper to swap or to pop
-			// if we can reach the non-junk slot, swap it up, else pop the junk
-
-			{
-				_stack.pop();
-				--numJunk;
-				continue;
-			}
-		}
-
-		// find the next best junk
-		std::optional<size_t> junk(std::nullopt);
-		for (size_t junkDepth = 1; junkDepth < std::min(static_cast<size_t>(17), _stack.size()); ++junkDepth)
-			if (std::holds_alternative<ssa::JunkSlot>(_stack.slot(junkDepth)))
-			{
-				junk = junkDepth;
-				break;
-			}
-
-		if (junk)
-		{
-			_stack.swap(*junk);
-			continue;
-		}
-
-		// give up if there's no more junk in reach
-		break;
-	}
-}
-
 }
 
 StackLayoutGenerator::StackLayoutGenerator(LivenessAnalysis const& _liveness, TerminationPathAnalysis const& _junkBlockFinder):
@@ -431,10 +385,6 @@ void StackLayoutGenerator::visitBlock(SSACFG::BlockId const& _blockId)
 				requiredStackTop.emplace_back(FunctionReturnLabel{&call->call.get()});
 		requiredStackTop += operation.inputs;
 
-		static auto constexpr slotIsCompatible = [](Slot const& _source, Slot const& _target)
-		{
-			return std::holds_alternative<JunkSlot>(_target) || _source == _target;
-		};
 
 		for (size_t depth = 0; depth < stack.size(); ++depth)
 			if (!liveOutWithoutOutputsSet.contains(stack.slot(depth)) && ranges::find(requiredStackTop, stack.slot(depth)) == ranges::end(requiredStackTop))
