@@ -52,6 +52,82 @@ for a stand-alone Yul mode.
 
 You can find more details on both optimizer modules and their optimization steps below.
 
+IR → IR Optimized Data Flow (Layered View)
+==========================================
+
+This section describes the data flow from unoptimized Yul IR to optimized IR and
+breaks the involved modules into layered responsibilities. The layers are listed
+from the foundational infrastructure up to the external entry points:
+
+Base layer (基础层: common types/tools/infrastructure)
+------------------------------------------------------
+
+- ``libsolutil`` and ``liblangutil`` provide shared utilities (JSON, algorithms,
+  diagnostics, ``EVMVersion``, ``DebugInfoSelection`` and source providers).
+- ``libyul`` core IR types such as ``AST`` nodes, ``Object``, ``Block``,
+  ``Dialect`` and ``YulName`` form the canonical representation of Yul IR.
+- Parser/printer building blocks (``AsmParser``, ``AsmPrinter``) allow IR text to
+  be converted into the in-memory representation used by the optimizer pipeline.
+
+Domain layer (领域层: domain model and rules)
+-------------------------------------------
+
+- IR generation domain model lives in ``libsolidity/codegen/ir``:
+  ``IRGenerator`` coordinates contract-level IR production and delegates
+  statement emission to ``IRGeneratorForStatements`` via
+  ``IRGenerationContext`` and ``YulUtilFunctions``.
+- Yul optimizer domain rules are implemented in ``libyul/optimiser`` as
+  ``OptimiserStep`` implementations (e.g. ``DeadCodeEliminator``,
+  ``CommonSubexpressionEliminator``, ``SSATransform``).
+- ``OptimiserSettings`` defines the optimizer configuration and the default
+  sequence used by the Yul optimizer.
+
+Application layer (应用层: use-case orchestration)
+-------------------------------------------------
+
+- ``CompilerStack::generateIR`` (``libsolidity/interface/CompilerStack.cpp``)
+  orchestrates IR generation, materializes the Yul IR string, parses it into a
+  ``YulStack`` and triggers optimization.
+- ``YulStack::optimize`` delegates to ``ObjectOptimizer``/``OptimiserSuite`` to
+  run the configured optimizer sequences and produces the optimized IR string.
+- ``CompilerContext::optimizeYul`` is used by the legacy pipeline when Yul
+  optimization is required inside EVM code generation.
+
+Adapter layer (适配层: interfaces/tasks/external systems)
+--------------------------------------------------------
+
+- CLI/Standard JSON options such as ``--ir-optimized`` and ``--optimize`` are
+  parsed in ``StandardCompiler`` and wire optimizer settings into
+  ``CompilerStack``.
+- Output selection and tests in ``test/cmdlineTests`` validate IR and optimized
+  IR output paths (e.g. ``ir_optimized_with_optimize``).
+
+End-to-end IR → IR optimized data flow
+--------------------------------------
+
+1. ``IRGenerator::run`` emits unoptimized Yul IR text for a contract.
+2. ``CompilerStack::generateIR`` stores the unoptimized IR and calls
+   ``loadGeneratedIR`` to parse it into ``YulStack``.
+3. ``YulStack::optimize`` builds the optimizer context and runs
+   ``OptimiserSuite::run`` (through ``ObjectOptimizer``) with the configured
+   optimizer sequence.
+4. The optimized IR is printed back to text via ``YulStack::print`` and stored
+   as ``compiledContract.yulIROptimized``.
+5. When compiling via IR, ``CompilerStack::generateEVMFromIR`` re-parses the
+   optimized IR and assembles EVM bytecode.
+
+Leaf nodes (业务流程的叶子节点示例)
+----------------------------------
+
+- IR generation: ``IRGenerator::run``, ``IRGenerator::generate`` and
+  ``IRGeneratorForStatements`` methods in
+  ``libsolidity/codegen/ir/IRGenerator*.cpp``.
+- Yul optimization entry: ``YulStack::optimize``,
+  ``ObjectOptimizer::optimize`` and ``OptimiserSuite::run``.
+- Optimization steps: individual passes such as
+  ``DeadCodeEliminator``, ``ExpressionSimplifier``, ``CommonSubexpressionEliminator``,
+  ``SSATransform`` and ``StackLimitEvader`` in ``libyul/optimiser``.
+
 Benefits of Optimizing Solidity Code
 ====================================
 
