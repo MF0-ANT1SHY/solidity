@@ -1,0 +1,27 @@
+{
+  "language": "Solidity",
+    "sources": {
+        "before.sol": { "urls": ["before.sol"] }
+    },
+  "settings": {
+    "optimizer": { "enabled": true, "runs": 200 },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "metadata",
+          "ir",
+          "irOptimized",
+          "evm.assembly",
+          "evm.bytecode.object",
+          "evm.deployedBytecode.object",
+          "evm.methodIdentifiers",
+          "storageLayout"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}
