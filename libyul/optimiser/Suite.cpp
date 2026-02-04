@@ -86,6 +86,9 @@ using namespace std;
 using namespace solidity;
 using namespace solidity::yul;
 
+/// 控制跳过所有passes
+bool OptimiserSuite::s_skipAllPasses = true;
+
 void OptimiserSuite::run(
 	Dialect const& _dialect,
 	GasMeter const* _meter,
@@ -96,6 +99,16 @@ void OptimiserSuite::run(
 	set<YulString> const& _externallyUsedIdentifiers
 )
 {
+	if (s_skipAllPasses) {
+		return;
+	}
+	/*
+	 * another option; Only remains Disambiguator which is necessary
+	 if (s_skipAllPasses) {
+	 	*_ojbect.code = std::get<Block>(Disambiguator(...)(*_object.code));
+		return;
+	 }
+	 */
 	EVMDialect const* evmDialect = dynamic_cast<EVMDialect const*>(&_dialect);
 	bool usesOptimizedCodeGenerator =
 		_optimizeStackAllocation &&

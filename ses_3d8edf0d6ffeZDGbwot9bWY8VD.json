@@ -1,0 +1,601 @@
+{
+  "info": {
+    "id": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+    "slug": "gentle-circuit",
+    "version": "1.1.50",
+    "projectID": "5b385908b32b0ba2ee88ec9a535e67c852467005",
+    "directory": "/data1/sureyang/repo/Workspace/0204/solidity",
+    "title": "Solidity optimiser suite: pass execution control feature",
+    "time": {
+      "created": 1770182020905,
+      "updated": 1770182603348
+    },
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "id": "msg_c27120f2d001HN37XKjaw26mcg",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "user",
+        "time": {
+          "created": 1770182020919
+        },
+        "summary": {
+          "title": "Solidity passes control experimental feature plan",
+          "diffs": []
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "kimi-for-coding",
+          "modelID": "k2p5"
+        },
+        "variant": "max"
+      },
+      "parts": [
+        {
+          "id": "prt_c27120f2d002MC9p4hH7eTgnWH",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "text",
+          "text": "@libyul/optimiser/Suite.cpp @libyul/optimiser/Suite.h 我想开发一个控制功能，用于控制passes在solidity编译过程中是否被执行（添加新功能后，所有passes能被完全跳过）。这是一个试验性的更改，最简单的做法是什么"
+        },
+        {
+          "id": "prt_c27120f2d003dew28Iz4AvTej8",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "libyul/optimiser/Suite.cpp",
+          "url": "file:///data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.cpp",
+          "source": {
+            "text": {
+              "value": "@libyul/optimiser/Suite.cpp",
+              "start": 0,
+              "end": 27
+            },
+            "type": "file",
+            "path": "libyul/optimiser/Suite.cpp"
+          }
+        },
+        {
+          "id": "prt_c27120f2d004SAd8LPmFB1WPXq",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "libyul/optimiser/Suite.h",
+          "url": "file:///data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.h",
+          "source": {
+            "text": {
+              "value": "@libyul/optimiser/Suite.h",
+              "start": 28,
+              "end": 53
+            },
+            "type": "file",
+            "path": "libyul/optimiser/Suite.h"
+          }
+        },
+        {
+          "id": "prt_c27120f38002DO3dNTao456QhJ",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.cpp\"}",
+          "synthetic": true
+        },
+        {
+          "id": "prt_c27120f3a001kXrNA2Um92rTcF",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.h\"}",
+          "synthetic": true
+        },
+        {
+          "id": "prt_c27120f3d001KGI7vKAczi2Gel",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "text",
+          "text": "<file>\n00001| /*\n00002| \tThis file is part of solidity.\n00003| \n00004| \tsolidity is free software: you can redistribute it and/or modify\n00005| \tit under the terms of the GNU General Public License as published by\n00006| \tthe Free Software Foundation, either version 3 of the License, or\n00007| \t(at your option) any later version.\n00008| \n00009| \tsolidity is distributed in the hope that it will be useful,\n00010| \tbut WITHOUT ANY WARRANTY; without even the implied warranty of\n00011| \tMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n00012| \tGNU General Public License for more details.\n00013| \n00014| \tYou should have received a copy of the GNU General Public License\n00015| \talong with solidity.  If not, see <http://www.gnu.org/licenses/>.\n00016| */\n00017| // SPDX-License-Identifier: GPL-3.0\n00018| /**\n00019|  * Optimiser suite that combines all steps and also provides the settings for the heuristics.\n00020|  */\n00021| \n00022| #include <libyul/optimiser/Suite.h>\n00023| \n00024| #include <libyul/optimiser/Disambiguator.h>\n00025| #include <libyul/optimiser/VarDeclInitializer.h>\n00026| #include <libyul/optimiser/BlockFlattener.h>\n00027| #include <libyul/optimiser/CallGraphGenerator.h>\n00028| #include <libyul/optimiser/CircularReferencesPruner.h>\n00029| #include <libyul/optimiser/ControlFlowSimplifier.h>\n00030| #include <libyul/optimiser/ConditionalSimplifier.h>\n00031| #include <libyul/optimiser/ConditionalUnsimplifier.h>\n00032| #include <libyul/optimiser/DeadCodeEliminator.h>\n00033| #include <libyul/optimiser/FunctionGrouper.h>\n00034| #include <libyul/optimiser/FunctionHoister.h>\n00035| #include <libyul/optimiser/EqualStoreEliminator.h>\n00036| #include <libyul/optimiser/EquivalentFunctionCombiner.h>\n00037| #include <libyul/optimiser/ExpressionSplitter.h>\n00038| #include <libyul/optimiser/ExpressionJoiner.h>\n00039| #include <libyul/optimiser/ExpressionInliner.h>\n00040| #include <libyul/optimiser/FullInliner.h>\n00041| #include <libyul/optimiser/ForLoopConditionIntoBody.h>\n00042| #include <libyul/optimiser/ForLoopConditionOutOfBody.h>\n00043| #include <libyul/optimiser/ForLoopInitRewriter.h>\n00044| #include <libyul/optimiser/ForLoopConditionIntoBody.h>\n00045| #include <libyul/optimiser/FunctionSpecializer.h>\n00046| #include <libyul/optimiser/ReasoningBasedSimplifier.h>\n00047| #include <libyul/optimiser/Rematerialiser.h>\n00048| #include <libyul/optimiser/UnusedFunctionParameterPruner.h>\n00049| #include <libyul/optimiser/UnusedPruner.h>\n00050| #include <libyul/optimiser/ExpressionSimplifier.h>\n00051| #include <libyul/optimiser/CommonSubexpressionEliminator.h>\n00052| #include <libyul/optimiser/Semantics.h>\n00053| #include <libyul/optimiser/SSAReverser.h>\n00054| #include <libyul/optimiser/SSATransform.h>\n00055| #include <libyul/optimiser/StackCompressor.h>\n00056| #include <libyul/optimiser/StackLimitEvader.h>\n00057| #include <libyul/optimiser/StructuralSimplifier.h>\n00058| #include <libyul/optimiser/SyntacticalEquality.h>\n00059| #include <libyul/optimiser/UnusedAssignEliminator.h>\n00060| #include <libyul/optimiser/VarNameCleaner.h>\n00061| #include <libyul/optimiser/LoadResolver.h>\n00062| #include <libyul/optimiser/LoopInvariantCodeMotion.h>\n00063| #include <libyul/optimiser/Metrics.h>\n00064| #include <libyul/optimiser/NameSimplifier.h>\n00065| #include <libyul/backends/evm/ConstantOptimiser.h>\n00066| #include <libyul/AsmAnalysis.h>\n00067| #include <libyul/AsmAnalysisInfo.h>\n00068| #include <libyul/AsmPrinter.h>\n00069| #include <libyul/AST.h>\n00070| #include <libyul/Object.h>\n00071| \n00072| #include <libyul/backends/wasm/WasmDialect.h>\n00073| #include <libyul/backends/evm/NoOutputAssembly.h>\n00074| \n00075| #include <libsolutil/CommonData.h>\n00076| \n00077| #include <libyul/CompilabilityChecker.h>\n00078| \n00079| #include <range/v3/view/map.hpp>\n00080| #include <range/v3/action/remove.hpp>\n00081| \n00082| #include <limits>\n00083| #include <tuple>\n00084| \n00085| using namespace std;\n00086| using namespace solidity;\n00087| using namespace solidity::yul;\n00088| \n00089| void OptimiserSuite::run(\n00090| \tDialect const& _dialect,\n00091| \tGasMeter const* _meter,\n00092| \tObject& _object,\n00093| \tbool _optimizeStackAllocation,\n00094| \tstring_view _optimisationSequence,\n00095| \toptional<size_t> _expectedExecutionsPerDeployment,\n00096| \tset<YulString> const& _externallyUsedIdentifiers\n00097| )\n00098| {\n00099| \tEVMDialect const* evmDialect = dynamic_cast<EVMDialect const*>(&_dialect);\n00100| \tbool usesOptimizedCodeGenerator =\n00101| \t\t_optimizeStackAllocation &&\n00102| \t\tevmDialect &&\n00103| \t\tevmDialect->evmVersion().canOverchargeGasForCall() &&\n00104| \t\tevmDialect->providesObjectAccess();\n00105| \tset<YulString> reservedIdentifiers = _externallyUsedIdentifiers;\n00106| \treservedIdentifiers += _dialect.fixedFunctionNames();\n00107| \n00108| \t*_object.code = std::get<Block>(Disambiguator(\n00109| \t\t_dialect,\n00110| \t\t*_object.analysisInfo,\n00111| \t\treservedIdentifiers\n00112| \t)(*_object.code));\n00113| \tBlock& ast = *_object.code;\n00114| \n00115| \tNameDispenser dispenser{_dialect, ast, reservedIdentifiers};\n00116| \tOptimiserStepContext context{_dialect, dispenser, reservedIdentifiers, _expectedExecutionsPerDeployment};\n00117| \n00118| \tOptimiserSuite suite(context, Debug::None);\n00119| \n00120| \t// Some steps depend on properties ensured by FunctionHoister, BlockFlattener, FunctionGrouper and\n00121| \t// ForLoopInitRewriter. Run them first to be able to run arbitrary sequences safely.\n00122| \tsuite.runSequence(\"hgfo\", ast);\n00123| \n00124| \tNameSimplifier::run(suite.m_context, ast);\n00125| \t// Now the user-supplied part\n00126| \tsuite.runSequence(_optimisationSequence, ast);\n00127| \n00128| \t// This is a tuning parameter, but actually just prevents infinite loops.\n00129| \tsize_t stackCompressorMaxIterations = 16;\n00130| \tsuite.runSequence(\"g\", ast);\n00131| \n00132| \t// We ignore the return value because we will get a much better error\n00133| \t// message once we perform code generation.\n00134| \tif (!usesOptimizedCodeGenerator)\n00135| \t\tStackCompressor::run(\n00136| \t\t\t_dialect,\n00137| \t\t\t_object,\n00138| \t\t\t_optimizeStackAllocation,\n00139| \t\t\tstackCompressorMaxIterations\n00140| \t\t);\n00141| \tsuite.runSequence(\"fDnTOc g\", ast);\n00142| \n00143| \tif (evmDialect)\n00144| \t{\n00145| \t\tyulAssert(_meter, \"\");\n00146| \t\tConstantOptimiser{*evmDialect, *_meter}(ast);\n00147| \t\tif (usesOptimizedCodeGenerator)\n00148| \t\t{\n00149| \t\t\tStackCompressor::run(\n00150| \t\t\t\t_dialect,\n00151| \t\t\t\t_object,\n00152| \t\t\t\t_optimizeStackAllocation,\n00153| \t\t\t\tstackCompressorMaxIterations\n00154| \t\t\t);\n00155| \t\t\tif (evmDialect->providesObjectAccess())\n00156| \t\t\t\tStackLimitEvader::run(suite.m_context, _object);\n00157| \t\t}\n00158| \t\telse if (evmDialect->providesObjectAccess() && _optimizeStackAllocation)\n00159| \t\t\tStackLimitEvader::run(suite.m_context, _object);\n00160| \t}\n00161| \telse if (dynamic_cast<WasmDialect const*>(&_dialect))\n00162| \t{\n00163| \t\t// If the first statement is an empty block, remove it.\n00164| \t\t// We should only have function definitions after that.\n00165| \t\tif (ast.statements.size() > 1 && std::get<Block>(ast.statements.front()).statements.empty())\n00166| \t\t\tast.statements.erase(ast.statements.begin());\n00167| \t}\n00168| \n00169| \tdispenser.reset(ast);\n00170| \tNameSimplifier::run(suite.m_context, ast);\n00171| \tVarNameCleaner::run(suite.m_context, ast);\n00172| \n00173| \t*_object.analysisInfo = AsmAnalyzer::analyzeStrictAssertCorrect(_dialect, _object);\n00174| }\n00175| \n00176| namespace\n00177| {\n00178| \n00179| \n00180| template <class... Step>\n00181| map<string, unique_ptr<OptimiserStep>> optimiserStepCollection()\n00182| {\n00183| \tmap<string, unique_ptr<OptimiserStep>> ret;\n00184| \tfor (unique_ptr<OptimiserStep>& s: util::make_vector<unique_ptr<OptimiserStep>>(\n00185| \t\t(make_unique<OptimiserStepInstance<Step>>())...\n00186| \t))\n00187| \t{\n00188| \t\tyulAssert(!ret.count(s->name), \"\");\n00189| \t\tret[s->name] = std::move(s);\n00190| \t}\n00191| \treturn ret;\n00192| }\n00193| \n00194| }\n00195| \n00196| map<string, unique_ptr<OptimiserStep>> const& OptimiserSuite::allSteps()\n00197| {\n00198| \tstatic map<string, unique_ptr<OptimiserStep>> instance;\n00199| \tif (instance.empty())\n00200| \t\tinstance = optimiserStepCollection<\n00201| \t\t\tBlockFlattener,\n00202| \t\t\tCircularReferencesPruner,\n00203| \t\t\tCommonSubexpressionEliminator,\n00204| \t\t\tConditionalSimplifier,\n00205| \t\t\tConditionalUnsimplifier,\n00206| \t\t\tControlFlowSimplifier,\n00207| \t\t\tDeadCodeEliminator,\n00208| \t\t\tEqualStoreEliminator,\n00209| \t\t\tEquivalentFunctionCombiner,\n00210| \t\t\tExpressionInliner,\n00211| \t\t\tExpressionJoiner,\n00212| \t\t\tExpressionSimplifier,\n00213| \t\t\tExpressionSplitter,\n00214| \t\t\tForLoopConditionIntoBody,\n00215| \t\t\tForLoopConditionOutOfBody,\n00216| \t\t\tForLoopInitRewriter,\n00217| \t\t\tFullInliner,\n00218| \t\t\tFunctionGrouper,\n00219| \t\t\tFunctionHoister,\n00220| \t\t\tFunctionSpecializer,\n00221| \t\t\tLiteralRematerialiser,\n00222| \t\t\tLoadResolver,\n00223| \t\t\tLoopInvariantCodeMotion,\n00224| \t\t\tUnusedAssignEliminator,\n00225| \t\t\tReasoningBasedSimplifier,\n00226| \t\t\tRematerialiser,\n00227| \t\t\tSSAReverser,\n00228| \t\t\tSSATransform,\n00229| \t\t\tStructuralSimplifier,\n00230| \t\t\tUnusedFunctionParameterPruner,\n00231| \t\t\tUnusedPruner,\n00232| \t\t\tVarDeclInitializer\n00233| \t\t>();\n00234| \t// Does not include VarNameCleaner because it destroys the property of unique names.\n00235| \t// Does not include NameSimplifier.\n00236| \treturn instance;\n00237| }\n00238| \n00239| map<string, char> const& OptimiserSuite::stepNameToAbbreviationMap()\n00240| {\n00241| \tstatic map<string, char> lookupTable{\n00242| \t\t{BlockFlattener::name,                'f'},\n00243| \t\t{CircularReferencesPruner::name,      'l'},\n00244| \t\t{CommonSubexpressionEliminator::name, 'c'},\n00245| \t\t{ConditionalSimplifier::name,         'C'},\n00246| \t\t{ConditionalUnsimplifier::name,       'U'},\n00247| \t\t{ControlFlowSimplifier::name,         'n'},\n00248| \t\t{DeadCodeEliminator::name,            'D'},\n00249| \t\t{EqualStoreEliminator::name,          'E'},\n00250| \t\t{EquivalentFunctionCombiner::name,    'v'},\n00251| \t\t{ExpressionInliner::name,             'e'},\n00252| \t\t{ExpressionJoiner::name,              'j'},\n00253| \t\t{ExpressionSimplifier::name,          's'},\n00254| \t\t{ExpressionSplitter::name,            'x'},\n00255| \t\t{ForLoopConditionIntoBody::name,      'I'},\n00256| \t\t{ForLoopConditionOutOfBody::name,     'O'},\n00257| \t\t{ForLoopInitRewriter::name,           'o'},\n00258| \t\t{FullInliner::name,                   'i'},\n00259| \t\t{FunctionGrouper::name,               'g'},\n00260| \t\t{FunctionHoister::name,               'h'},\n00261| \t\t{FunctionSpecializer::name,           'F'},\n00262| \t\t{LiteralRematerialiser::name,         'T'},\n00263| \t\t{LoadResolver::name,                  'L'},\n00264| \t\t{LoopInvariantCodeMotion::name,       'M'},\n00265| \t\t{ReasoningBasedSimplifier::name,      'R'},\n00266| \t\t{UnusedAssignEliminator::name,        'r'},\n00267| \t\t{Rematerialiser::name,                'm'},\n00268| \t\t{SSAReverser::name,                   'V'},\n00269| \t\t{SSATransform::name,                  'a'},\n00270| \t\t{StructuralSimplifier::name,          't'},\n00271| \t\t{UnusedFunctionParameterPruner::name, 'p'},\n00272| \t\t{UnusedPruner::name,                  'u'},\n00273| \t\t{VarDeclInitializer::name,            'd'},\n00274| \t};\n00275| \tyulAssert(lookupTable.size() == allSteps().size(), \"\");\n00276| \tyulAssert((\n00277| \t\t\tutil::convertContainer<set<char>>(string(NonStepAbbreviations)) -\n00278| \t\t\tutil::convertContainer<set<char>>(lookupTable | ranges::views::values)\n00279| \t\t).size() == string(NonStepAbbreviations).size(),\n00280| \t\t\"Step abbreviation conflicts with a character reserved for another syntactic element\"\n00281| \t);\n00282| \n00283| \treturn lookupTable;\n00284| }\n00285| \n00286| map<char, string> const& OptimiserSuite::stepAbbreviationToNameMap()\n00287| {\n00288| \tstatic map<char, string> lookupTable = util::invertMap(stepNameToAbbreviationMap());\n00289| \n00290| \treturn lookupTable;\n00291| }\n00292| \n00293| void OptimiserSuite::validateSequence(string_view _stepAbbreviations)\n00294| {\n00295| \tint8_t nestingLevel = 0;\n00296| \tfor (char abbreviation: _stepAbbreviations)\n00297| \t\tswitch (abbreviation)\n00298| \t\t{\n00299| \t\tcase ' ':\n00300| \t\tcase '\\n':\n00301| \t\t\tbreak;\n00302| \t\tcase '[':\n00303| \t\t\tassertThrow(nestingLevel < numeric_limits<int8_t>::max(), OptimizerException, \"Brackets nested too deep\");\n00304| \t\t\tnestingLevel++;\n00305| \t\t\tbreak;\n00306| \t\tcase ']':\n00307| \t\t\tnestingLevel--;\n00308| \t\t\tassertThrow(nestingLevel >= 0, OptimizerException, \"Unbalanced brackets\");\n00309| \t\t\tbreak;\n00310| \t\tdefault:\n00311| \t\t{\n00312| \t\t\tyulAssert(\n00313| \t\t\t\tstring(NonStepAbbreviations).find(abbreviation) == string::npos,\n00314| \t\t\t\t\"Unhandled syntactic element in the abbreviation sequence\"\n00315| \t\t\t);\n00316| \t\t\tassertThrow(\n00317| \t\t\t\tstepAbbreviationToNameMap().find(abbreviation) != stepAbbreviationToNameMap().end(),\n00318| \t\t\t\tOptimizerException,\n00319| \t\t\t\t\"'\"s + abbreviation + \"' is not a valid step abbreviation\"\n00320| \t\t\t);\n00321| \t\t\toptional<string> invalid = allSteps().at(stepAbbreviationToNameMap().at(abbreviation))->invalidInCurrentEnvironment();\n00322| \t\t\tassertThrow(\n00323| \t\t\t\t!invalid.has_value(),\n00324| \t\t\t\tOptimizerException,\n00325| \t\t\t\t\"'\"s + abbreviation + \"' is invalid in the current environment: \" + *invalid\n00326| \t\t\t);\n00327| \t\t}\n00328| \t\t}\n00329| \tassertThrow(nestingLevel == 0, OptimizerException, \"Unbalanced brackets\");\n00330| }\n00331| \n00332| void OptimiserSuite::runSequence(string_view _stepAbbreviations, Block& _ast, bool _repeatUntilStable)\n00333| {\n00334| \tvalidateSequence(_stepAbbreviations);\n00335| \n00336| \t// This splits 'aaa[bbb]ccc...' into 'aaa' and '[bbb]ccc...'.\n00337| \tauto extractNonNestedPrefix = [](string_view _tail) -> tuple<string_view, string_view>\n00338| \t{\n00339| \t\tfor (size_t i = 0; i < _tail.size(); ++i)\n00340| \t\t{\n00341| \t\t\tyulAssert(_tail[i] != ']');\n00342| \t\t\tif (_tail[i] == '[')\n00343| \t\t\t\treturn {_tail.substr(0, i), _tail.substr(i)};\n00344| \t\t}\n00345| \t\treturn {_tail, {}};\n00346| \t};\n00347| \n00348| \t// This splits '[bbb]ccc...' into 'bbb' and 'ccc...'.\n00349| \tauto extractBracketContent = [](string_view _tail) -> tuple<string_view, string_view>\n00350| \t{\n00351| \t\tyulAssert(!_tail.empty() && _tail[0] == '[');\n00352| \n00353| \t\tsize_t contentLength = 0;\n00354| \t\tint8_t nestingLevel = 1;\n00355| \t\tfor (char abbreviation: _tail.substr(1))\n00356| \t\t{\n00357| \t\t\tif (abbreviation == '[')\n00358| \t\t\t{\n00359| \t\t\t\tyulAssert(nestingLevel < numeric_limits<int8_t>::max());\n00360| \t\t\t\t++nestingLevel;\n00361| \t\t\t}\n00362| \t\t\telse if (abbreviation == ']')\n00363| \t\t\t{\n00364| \t\t\t\t--nestingLevel;\n00365| \t\t\t\tif (nestingLevel == 0)\n00366| \t\t\t\t\tbreak;\n00367| \t\t\t}\n00368| \t\t\t++contentLength;\n00369| \t\t}\n00370| \t\tyulAssert(nestingLevel == 0);\n00371| \t\tyulAssert(_tail[contentLength + 1] == ']');\n00372| \n00373| \t\treturn {_tail.substr(1, contentLength), _tail.substr(contentLength + 2)};\n00374| \t};\n00375| \n00376| \tauto abbreviationsToSteps = [](string_view _sequence) -> vector<string>\n00377| \t{\n00378| \t\tvector<string> steps;\n00379| \t\tfor (char abbreviation: _sequence)\n00380| \t\t\tif (abbreviation != ' ' && abbreviation != '\\n')\n00381| \t\t\t\tsteps.emplace_back(stepAbbreviationToNameMap().at(abbreviation));\n00382| \t\treturn steps;\n00383| \t};\n00384| \n00385| \tvector<tuple<string_view, bool>> subsequences;\n00386| \tstring_view tail = _stepAbbreviations;\n00387| \twhile (!tail.empty())\n00388| \t{\n00389| \t\tstring_view subsequence;\n00390| \t\ttie(subsequence, tail) = extractNonNestedPrefix(tail);\n00391| \t\tif (subsequence.size() > 0)\n00392| \t\t\tsubsequences.push_back({subsequence, false});\n00393| \n00394| \t\tif (tail.empty())\n00395| \t\t\tbreak;\n00396| \n00397| \t\ttie(subsequence, tail) = extractBracketContent(tail);\n00398| \t\tif (subsequence.size() > 0)\n00399| \t\t\tsubsequences.push_back({subsequence, true});\n00400| \t}\n00401| \n00402| \tsize_t codeSize = 0;\n00403| \tfor (size_t round = 0; round < MaxRounds; ++round)\n00404| \t{\n00405| \t\tfor (auto const& [subsequence, repeat]: subsequences)\n00406| \t\t{\n00407| \t\t\tif (repeat)\n00408| \t\t\t\trunSequence(subsequence, _ast, true);\n00409| \t\t\telse\n00410| \t\t\t\trunSequence(abbreviationsToSteps(subsequence), _ast);\n00411| \t\t}\n00412| \n00413| \t\tif (!_repeatUntilStable)\n00414| \t\t\tbreak;\n00415| \n00416| \t\tsize_t newSize = CodeSize::codeSizeIncludingFunctions(_ast);\n00417| \t\tif (newSize == codeSize)\n00418| \t\t\tbreak;\n00419| \t\tcodeSize = newSize;\n00420| \t}\n00421| }\n00422| \n00423| void OptimiserSuite::runSequence(std::vector<string> const& _steps, Block& _ast)\n00424| {\n00425| \tunique_ptr<Block> copy;\n00426| \tif (m_debug == Debug::PrintChanges)\n00427| \t\tcopy = make_unique<Block>(std::get<Block>(ASTCopier{}(_ast)));\n00428| \tfor (string const& step: _steps)\n00429| \t{\n00430| \t\tif (m_debug == Debug::PrintStep)\n00431| \t\t\tcout << \"Running \" << step << endl;\n00432| \t\tallSteps().at(step)->run(m_context, _ast);\n00433| \t\tif (m_debug == Debug::PrintChanges)\n00434| \t\t{\n00435| \t\t\t// TODO should add switch to also compare variable names!\n00436| \t\t\tif (SyntacticallyEqual{}.statementEqual(_ast, *copy))\n00437| \t\t\t\tcout << \"== Running \" << step << \" did not cause changes.\" << endl;\n00438| \t\t\telse\n00439| \t\t\t{\n00440| \t\t\t\tcout << \"== Running \" << step << \" changed the AST.\" << endl;\n00441| \t\t\t\tcout << AsmPrinter{}(_ast) << endl;\n00442| \t\t\t\tcopy = make_unique<Block>(std::get<Block>(ASTCopier{}(_ast)));\n00443| \t\t\t}\n00444| \t\t}\n00445| \t}\n00446| }\n00447| \n\n(End of file - total 447 lines)\n</file>",
+          "synthetic": true
+        },
+        {
+          "id": "prt_c27120f3d002wlH7vmO6w35kxU",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c27120f2d001HN37XKjaw26mcg",
+          "type": "text",
+          "text": "<file>\n00001| /*\n00002| \tThis file is part of solidity.\n00003| \n00004| \tsolidity is free software: you can redistribute it and/or modify\n00005| \tit under the terms of the GNU General Public License as published by\n00006| \tthe Free Software Foundation, either version 3 of the License, or\n00007| \t(at your option) any later version.\n00008| \n00009| \tsolidity is distributed in the hope that it will be useful,\n00010| \tbut WITHOUT ANY WARRANTY; without even the implied warranty of\n00011| \tMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n00012| \tGNU General Public License for more details.\n00013| \n00014| \tYou should have received a copy of the GNU General Public License\n00015| \talong with solidity.  If not, see <http://www.gnu.org/licenses/>.\n00016| */\n00017| // SPDX-License-Identifier: GPL-3.0\n00018| /**\n00019|  * Optimiser suite that combines all steps and also provides the settings for the heuristics.\n00020|  */\n00021| \n00022| #pragma once\n00023| \n00024| #include <libyul/ASTForward.h>\n00025| #include <libyul/YulString.h>\n00026| #include <libyul/optimiser/OptimiserStep.h>\n00027| #include <libyul/optimiser/NameDispenser.h>\n00028| #include <liblangutil/EVMVersion.h>\n00029| \n00030| #include <set>\n00031| #include <string>\n00032| #include <string_view>\n00033| #include <memory>\n00034| \n00035| namespace solidity::yul\n00036| {\n00037| \n00038| struct AsmAnalysisInfo;\n00039| struct Dialect;\n00040| class GasMeter;\n00041| struct Object;\n00042| \n00043| /**\n00044|  * Optimiser suite that combines all steps and also provides the settings for the heuristics.\n00045|  * Only optimizes the code of the provided object, does not descend into the sub-objects.\n00046|  */\n00047| class OptimiserSuite\n00048| {\n00049| public:\n00050| \tstatic constexpr size_t MaxRounds = 12;\n00051| \n00052| \t/// Special characters that do not represent optimiser steps but are allowed in abbreviation sequences.\n00053| \t/// Some of them (like whitespace) are ignored, others (like brackets) are a part of the syntax.\n00054| \tstatic constexpr char NonStepAbbreviations[] = \" \\n[]\";\n00055| \n00056| \tenum class Debug\n00057| \t{\n00058| \t\tNone,\n00059| \t\tPrintStep,\n00060| \t\tPrintChanges\n00061| \t};\n00062| \tOptimiserSuite(OptimiserStepContext& _context, Debug _debug = Debug::None): m_context(_context), m_debug(_debug) {}\n00063| \n00064| \t/// The value nullopt for `_expectedExecutionsPerDeployment` represents creation code.\n00065| \tstatic void run(\n00066| \t\tDialect const& _dialect,\n00067| \t\tGasMeter const* _meter,\n00068| \t\tObject& _object,\n00069| \t\tbool _optimizeStackAllocation,\n00070| \t\tstd::string_view _optimisationSequence,\n00071| \t\tstd::optional<size_t> _expectedExecutionsPerDeployment,\n00072| \t\tstd::set<YulString> const& _externallyUsedIdentifiers = {}\n00073| \t);\n00074| \n00075| \t/// Ensures that specified sequence of step abbreviations is well-formed and can be executed.\n00076| \t/// @throw OptimizerException if the sequence is invalid\n00077| \tstatic void validateSequence(std::string_view _stepAbbreviations);\n00078| \n00079| \tvoid runSequence(std::vector<std::string> const& _steps, Block& _ast);\n00080| \tvoid runSequence(std::string_view _stepAbbreviations, Block& _ast, bool _repeatUntilStable = false);\n00081| \n00082| \tstatic std::map<std::string, std::unique_ptr<OptimiserStep>> const& allSteps();\n00083| \tstatic std::map<std::string, char> const& stepNameToAbbreviationMap();\n00084| \tstatic std::map<char, std::string> const& stepAbbreviationToNameMap();\n00085| \n00086| private:\n00087| \tOptimiserStepContext& m_context;\n00088| \tDebug m_debug;\n00089| };\n00090| \n00091| }\n00092| \n\n(End of file - total 92 lines)\n</file>",
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c27120f58001TWQHwClIUM1J6M",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "assistant",
+        "time": {
+          "created": 1770182020952,
+          "completed": 1770182024339
+        },
+        "error": {
+          "name": "MessageAbortedError",
+          "data": {
+            "message": "The operation was aborted."
+          }
+        },
+        "parentID": "msg_c27120f2d001HN37XKjaw26mcg",
+        "modelID": "k2p5",
+        "providerID": "kimi-for-coding",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/data1/sureyang/repo/Workspace/0204/solidity",
+          "root": "/data1/sureyang/repo/Workspace/0204/solidity"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "parts": []
+    },
+    {
+      "info": {
+        "id": "msg_c271223bf001m4FimvSpDZ7uge",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "user",
+        "time": {
+          "created": 1770182026181
+        },
+        "summary": {
+          "title": "Solidity passes control for optimisation suite usage",
+          "diffs": []
+        },
+        "agent": "plan",
+        "model": {
+          "providerID": "kimi-for-coding",
+          "modelID": "k2p5"
+        },
+        "variant": "max"
+      },
+      "parts": [
+        {
+          "id": "prt_c271223bf002S7pkTwfQ4Jpx5x",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "text",
+          "text": "@libyul/optimiser/Suite.cpp @libyul/optimiser/Suite.h 我想开发一个控制功能，用于控制passes在solidity编译过程中是否被执行（添加新功能后，所有passes能被完全跳过）。这是一个试验性的更改，最简单的做法是什么"
+        },
+        {
+          "id": "prt_c271223bf003JfD64R0xeXe8HS",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "libyul/optimiser/Suite.cpp",
+          "url": "file:///data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.cpp",
+          "source": {
+            "text": {
+              "value": "@libyul/optimiser/Suite.cpp",
+              "start": 0,
+              "end": 27
+            },
+            "type": "file",
+            "path": "libyul/optimiser/Suite.cpp"
+          }
+        },
+        {
+          "id": "prt_c271223bf004VBIXTnYBE27E5f",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "libyul/optimiser/Suite.h",
+          "url": "file:///data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.h",
+          "source": {
+            "text": {
+              "value": "@libyul/optimiser/Suite.h",
+              "start": 28,
+              "end": 53
+            },
+            "type": "file",
+            "path": "libyul/optimiser/Suite.h"
+          }
+        },
+        {
+          "id": "prt_c271223c5002arjfki1gv9Sv4h",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.cpp\"}",
+          "synthetic": true
+        },
+        {
+          "id": "prt_c271223c50031QF9VQi2pgHC0V",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.h\"}",
+          "synthetic": true
+        },
+        {
+          "id": "prt_c271223c6001ls66p5QnPO8JOI",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "text",
+          "text": "<file>\n00001| /*\n00002| \tThis file is part of solidity.\n00003| \n00004| \tsolidity is free software: you can redistribute it and/or modify\n00005| \tit under the terms of the GNU General Public License as published by\n00006| \tthe Free Software Foundation, either version 3 of the License, or\n00007| \t(at your option) any later version.\n00008| \n00009| \tsolidity is distributed in the hope that it will be useful,\n00010| \tbut WITHOUT ANY WARRANTY; without even the implied warranty of\n00011| \tMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n00012| \tGNU General Public License for more details.\n00013| \n00014| \tYou should have received a copy of the GNU General Public License\n00015| \talong with solidity.  If not, see <http://www.gnu.org/licenses/>.\n00016| */\n00017| // SPDX-License-Identifier: GPL-3.0\n00018| /**\n00019|  * Optimiser suite that combines all steps and also provides the settings for the heuristics.\n00020|  */\n00021| \n00022| #include <libyul/optimiser/Suite.h>\n00023| \n00024| #include <libyul/optimiser/Disambiguator.h>\n00025| #include <libyul/optimiser/VarDeclInitializer.h>\n00026| #include <libyul/optimiser/BlockFlattener.h>\n00027| #include <libyul/optimiser/CallGraphGenerator.h>\n00028| #include <libyul/optimiser/CircularReferencesPruner.h>\n00029| #include <libyul/optimiser/ControlFlowSimplifier.h>\n00030| #include <libyul/optimiser/ConditionalSimplifier.h>\n00031| #include <libyul/optimiser/ConditionalUnsimplifier.h>\n00032| #include <libyul/optimiser/DeadCodeEliminator.h>\n00033| #include <libyul/optimiser/FunctionGrouper.h>\n00034| #include <libyul/optimiser/FunctionHoister.h>\n00035| #include <libyul/optimiser/EqualStoreEliminator.h>\n00036| #include <libyul/optimiser/EquivalentFunctionCombiner.h>\n00037| #include <libyul/optimiser/ExpressionSplitter.h>\n00038| #include <libyul/optimiser/ExpressionJoiner.h>\n00039| #include <libyul/optimiser/ExpressionInliner.h>\n00040| #include <libyul/optimiser/FullInliner.h>\n00041| #include <libyul/optimiser/ForLoopConditionIntoBody.h>\n00042| #include <libyul/optimiser/ForLoopConditionOutOfBody.h>\n00043| #include <libyul/optimiser/ForLoopInitRewriter.h>\n00044| #include <libyul/optimiser/ForLoopConditionIntoBody.h>\n00045| #include <libyul/optimiser/FunctionSpecializer.h>\n00046| #include <libyul/optimiser/ReasoningBasedSimplifier.h>\n00047| #include <libyul/optimiser/Rematerialiser.h>\n00048| #include <libyul/optimiser/UnusedFunctionParameterPruner.h>\n00049| #include <libyul/optimiser/UnusedPruner.h>\n00050| #include <libyul/optimiser/ExpressionSimplifier.h>\n00051| #include <libyul/optimiser/CommonSubexpressionEliminator.h>\n00052| #include <libyul/optimiser/Semantics.h>\n00053| #include <libyul/optimiser/SSAReverser.h>\n00054| #include <libyul/optimiser/SSATransform.h>\n00055| #include <libyul/optimiser/StackCompressor.h>\n00056| #include <libyul/optimiser/StackLimitEvader.h>\n00057| #include <libyul/optimiser/StructuralSimplifier.h>\n00058| #include <libyul/optimiser/SyntacticalEquality.h>\n00059| #include <libyul/optimiser/UnusedAssignEliminator.h>\n00060| #include <libyul/optimiser/VarNameCleaner.h>\n00061| #include <libyul/optimiser/LoadResolver.h>\n00062| #include <libyul/optimiser/LoopInvariantCodeMotion.h>\n00063| #include <libyul/optimiser/Metrics.h>\n00064| #include <libyul/optimiser/NameSimplifier.h>\n00065| #include <libyul/backends/evm/ConstantOptimiser.h>\n00066| #include <libyul/AsmAnalysis.h>\n00067| #include <libyul/AsmAnalysisInfo.h>\n00068| #include <libyul/AsmPrinter.h>\n00069| #include <libyul/AST.h>\n00070| #include <libyul/Object.h>\n00071| \n00072| #include <libyul/backends/wasm/WasmDialect.h>\n00073| #include <libyul/backends/evm/NoOutputAssembly.h>\n00074| \n00075| #include <libsolutil/CommonData.h>\n00076| \n00077| #include <libyul/CompilabilityChecker.h>\n00078| \n00079| #include <range/v3/view/map.hpp>\n00080| #include <range/v3/action/remove.hpp>\n00081| \n00082| #include <limits>\n00083| #include <tuple>\n00084| \n00085| using namespace std;\n00086| using namespace solidity;\n00087| using namespace solidity::yul;\n00088| \n00089| void OptimiserSuite::run(\n00090| \tDialect const& _dialect,\n00091| \tGasMeter const* _meter,\n00092| \tObject& _object,\n00093| \tbool _optimizeStackAllocation,\n00094| \tstring_view _optimisationSequence,\n00095| \toptional<size_t> _expectedExecutionsPerDeployment,\n00096| \tset<YulString> const& _externallyUsedIdentifiers\n00097| )\n00098| {\n00099| \tEVMDialect const* evmDialect = dynamic_cast<EVMDialect const*>(&_dialect);\n00100| \tbool usesOptimizedCodeGenerator =\n00101| \t\t_optimizeStackAllocation &&\n00102| \t\tevmDialect &&\n00103| \t\tevmDialect->evmVersion().canOverchargeGasForCall() &&\n00104| \t\tevmDialect->providesObjectAccess();\n00105| \tset<YulString> reservedIdentifiers = _externallyUsedIdentifiers;\n00106| \treservedIdentifiers += _dialect.fixedFunctionNames();\n00107| \n00108| \t*_object.code = std::get<Block>(Disambiguator(\n00109| \t\t_dialect,\n00110| \t\t*_object.analysisInfo,\n00111| \t\treservedIdentifiers\n00112| \t)(*_object.code));\n00113| \tBlock& ast = *_object.code;\n00114| \n00115| \tNameDispenser dispenser{_dialect, ast, reservedIdentifiers};\n00116| \tOptimiserStepContext context{_dialect, dispenser, reservedIdentifiers, _expectedExecutionsPerDeployment};\n00117| \n00118| \tOptimiserSuite suite(context, Debug::None);\n00119| \n00120| \t// Some steps depend on properties ensured by FunctionHoister, BlockFlattener, FunctionGrouper and\n00121| \t// ForLoopInitRewriter. Run them first to be able to run arbitrary sequences safely.\n00122| \tsuite.runSequence(\"hgfo\", ast);\n00123| \n00124| \tNameSimplifier::run(suite.m_context, ast);\n00125| \t// Now the user-supplied part\n00126| \tsuite.runSequence(_optimisationSequence, ast);\n00127| \n00128| \t// This is a tuning parameter, but actually just prevents infinite loops.\n00129| \tsize_t stackCompressorMaxIterations = 16;\n00130| \tsuite.runSequence(\"g\", ast);\n00131| \n00132| \t// We ignore the return value because we will get a much better error\n00133| \t// message once we perform code generation.\n00134| \tif (!usesOptimizedCodeGenerator)\n00135| \t\tStackCompressor::run(\n00136| \t\t\t_dialect,\n00137| \t\t\t_object,\n00138| \t\t\t_optimizeStackAllocation,\n00139| \t\t\tstackCompressorMaxIterations\n00140| \t\t);\n00141| \tsuite.runSequence(\"fDnTOc g\", ast);\n00142| \n00143| \tif (evmDialect)\n00144| \t{\n00145| \t\tyulAssert(_meter, \"\");\n00146| \t\tConstantOptimiser{*evmDialect, *_meter}(ast);\n00147| \t\tif (usesOptimizedCodeGenerator)\n00148| \t\t{\n00149| \t\t\tStackCompressor::run(\n00150| \t\t\t\t_dialect,\n00151| \t\t\t\t_object,\n00152| \t\t\t\t_optimizeStackAllocation,\n00153| \t\t\t\tstackCompressorMaxIterations\n00154| \t\t\t);\n00155| \t\t\tif (evmDialect->providesObjectAccess())\n00156| \t\t\t\tStackLimitEvader::run(suite.m_context, _object);\n00157| \t\t}\n00158| \t\telse if (evmDialect->providesObjectAccess() && _optimizeStackAllocation)\n00159| \t\t\tStackLimitEvader::run(suite.m_context, _object);\n00160| \t}\n00161| \telse if (dynamic_cast<WasmDialect const*>(&_dialect))\n00162| \t{\n00163| \t\t// If the first statement is an empty block, remove it.\n00164| \t\t// We should only have function definitions after that.\n00165| \t\tif (ast.statements.size() > 1 && std::get<Block>(ast.statements.front()).statements.empty())\n00166| \t\t\tast.statements.erase(ast.statements.begin());\n00167| \t}\n00168| \n00169| \tdispenser.reset(ast);\n00170| \tNameSimplifier::run(suite.m_context, ast);\n00171| \tVarNameCleaner::run(suite.m_context, ast);\n00172| \n00173| \t*_object.analysisInfo = AsmAnalyzer::analyzeStrictAssertCorrect(_dialect, _object);\n00174| }\n00175| \n00176| namespace\n00177| {\n00178| \n00179| \n00180| template <class... Step>\n00181| map<string, unique_ptr<OptimiserStep>> optimiserStepCollection()\n00182| {\n00183| \tmap<string, unique_ptr<OptimiserStep>> ret;\n00184| \tfor (unique_ptr<OptimiserStep>& s: util::make_vector<unique_ptr<OptimiserStep>>(\n00185| \t\t(make_unique<OptimiserStepInstance<Step>>())...\n00186| \t))\n00187| \t{\n00188| \t\tyulAssert(!ret.count(s->name), \"\");\n00189| \t\tret[s->name] = std::move(s);\n00190| \t}\n00191| \treturn ret;\n00192| }\n00193| \n00194| }\n00195| \n00196| map<string, unique_ptr<OptimiserStep>> const& OptimiserSuite::allSteps()\n00197| {\n00198| \tstatic map<string, unique_ptr<OptimiserStep>> instance;\n00199| \tif (instance.empty())\n00200| \t\tinstance = optimiserStepCollection<\n00201| \t\t\tBlockFlattener,\n00202| \t\t\tCircularReferencesPruner,\n00203| \t\t\tCommonSubexpressionEliminator,\n00204| \t\t\tConditionalSimplifier,\n00205| \t\t\tConditionalUnsimplifier,\n00206| \t\t\tControlFlowSimplifier,\n00207| \t\t\tDeadCodeEliminator,\n00208| \t\t\tEqualStoreEliminator,\n00209| \t\t\tEquivalentFunctionCombiner,\n00210| \t\t\tExpressionInliner,\n00211| \t\t\tExpressionJoiner,\n00212| \t\t\tExpressionSimplifier,\n00213| \t\t\tExpressionSplitter,\n00214| \t\t\tForLoopConditionIntoBody,\n00215| \t\t\tForLoopConditionOutOfBody,\n00216| \t\t\tForLoopInitRewriter,\n00217| \t\t\tFullInliner,\n00218| \t\t\tFunctionGrouper,\n00219| \t\t\tFunctionHoister,\n00220| \t\t\tFunctionSpecializer,\n00221| \t\t\tLiteralRematerialiser,\n00222| \t\t\tLoadResolver,\n00223| \t\t\tLoopInvariantCodeMotion,\n00224| \t\t\tUnusedAssignEliminator,\n00225| \t\t\tReasoningBasedSimplifier,\n00226| \t\t\tRematerialiser,\n00227| \t\t\tSSAReverser,\n00228| \t\t\tSSATransform,\n00229| \t\t\tStructuralSimplifier,\n00230| \t\t\tUnusedFunctionParameterPruner,\n00231| \t\t\tUnusedPruner,\n00232| \t\t\tVarDeclInitializer\n00233| \t\t>();\n00234| \t// Does not include VarNameCleaner because it destroys the property of unique names.\n00235| \t// Does not include NameSimplifier.\n00236| \treturn instance;\n00237| }\n00238| \n00239| map<string, char> const& OptimiserSuite::stepNameToAbbreviationMap()\n00240| {\n00241| \tstatic map<string, char> lookupTable{\n00242| \t\t{BlockFlattener::name,                'f'},\n00243| \t\t{CircularReferencesPruner::name,      'l'},\n00244| \t\t{CommonSubexpressionEliminator::name, 'c'},\n00245| \t\t{ConditionalSimplifier::name,         'C'},\n00246| \t\t{ConditionalUnsimplifier::name,       'U'},\n00247| \t\t{ControlFlowSimplifier::name,         'n'},\n00248| \t\t{DeadCodeEliminator::name,            'D'},\n00249| \t\t{EqualStoreEliminator::name,          'E'},\n00250| \t\t{EquivalentFunctionCombiner::name,    'v'},\n00251| \t\t{ExpressionInliner::name,             'e'},\n00252| \t\t{ExpressionJoiner::name,              'j'},\n00253| \t\t{ExpressionSimplifier::name,          's'},\n00254| \t\t{ExpressionSplitter::name,            'x'},\n00255| \t\t{ForLoopConditionIntoBody::name,      'I'},\n00256| \t\t{ForLoopConditionOutOfBody::name,     'O'},\n00257| \t\t{ForLoopInitRewriter::name,           'o'},\n00258| \t\t{FullInliner::name,                   'i'},\n00259| \t\t{FunctionGrouper::name,               'g'},\n00260| \t\t{FunctionHoister::name,               'h'},\n00261| \t\t{FunctionSpecializer::name,           'F'},\n00262| \t\t{LiteralRematerialiser::name,         'T'},\n00263| \t\t{LoadResolver::name,                  'L'},\n00264| \t\t{LoopInvariantCodeMotion::name,       'M'},\n00265| \t\t{ReasoningBasedSimplifier::name,      'R'},\n00266| \t\t{UnusedAssignEliminator::name,        'r'},\n00267| \t\t{Rematerialiser::name,                'm'},\n00268| \t\t{SSAReverser::name,                   'V'},\n00269| \t\t{SSATransform::name,                  'a'},\n00270| \t\t{StructuralSimplifier::name,          't'},\n00271| \t\t{UnusedFunctionParameterPruner::name, 'p'},\n00272| \t\t{UnusedPruner::name,                  'u'},\n00273| \t\t{VarDeclInitializer::name,            'd'},\n00274| \t};\n00275| \tyulAssert(lookupTable.size() == allSteps().size(), \"\");\n00276| \tyulAssert((\n00277| \t\t\tutil::convertContainer<set<char>>(string(NonStepAbbreviations)) -\n00278| \t\t\tutil::convertContainer<set<char>>(lookupTable | ranges::views::values)\n00279| \t\t).size() == string(NonStepAbbreviations).size(),\n00280| \t\t\"Step abbreviation conflicts with a character reserved for another syntactic element\"\n00281| \t);\n00282| \n00283| \treturn lookupTable;\n00284| }\n00285| \n00286| map<char, string> const& OptimiserSuite::stepAbbreviationToNameMap()\n00287| {\n00288| \tstatic map<char, string> lookupTable = util::invertMap(stepNameToAbbreviationMap());\n00289| \n00290| \treturn lookupTable;\n00291| }\n00292| \n00293| void OptimiserSuite::validateSequence(string_view _stepAbbreviations)\n00294| {\n00295| \tint8_t nestingLevel = 0;\n00296| \tfor (char abbreviation: _stepAbbreviations)\n00297| \t\tswitch (abbreviation)\n00298| \t\t{\n00299| \t\tcase ' ':\n00300| \t\tcase '\\n':\n00301| \t\t\tbreak;\n00302| \t\tcase '[':\n00303| \t\t\tassertThrow(nestingLevel < numeric_limits<int8_t>::max(), OptimizerException, \"Brackets nested too deep\");\n00304| \t\t\tnestingLevel++;\n00305| \t\t\tbreak;\n00306| \t\tcase ']':\n00307| \t\t\tnestingLevel--;\n00308| \t\t\tassertThrow(nestingLevel >= 0, OptimizerException, \"Unbalanced brackets\");\n00309| \t\t\tbreak;\n00310| \t\tdefault:\n00311| \t\t{\n00312| \t\t\tyulAssert(\n00313| \t\t\t\tstring(NonStepAbbreviations).find(abbreviation) == string::npos,\n00314| \t\t\t\t\"Unhandled syntactic element in the abbreviation sequence\"\n00315| \t\t\t);\n00316| \t\t\tassertThrow(\n00317| \t\t\t\tstepAbbreviationToNameMap().find(abbreviation) != stepAbbreviationToNameMap().end(),\n00318| \t\t\t\tOptimizerException,\n00319| \t\t\t\t\"'\"s + abbreviation + \"' is not a valid step abbreviation\"\n00320| \t\t\t);\n00321| \t\t\toptional<string> invalid = allSteps().at(stepAbbreviationToNameMap().at(abbreviation))->invalidInCurrentEnvironment();\n00322| \t\t\tassertThrow(\n00323| \t\t\t\t!invalid.has_value(),\n00324| \t\t\t\tOptimizerException,\n00325| \t\t\t\t\"'\"s + abbreviation + \"' is invalid in the current environment: \" + *invalid\n00326| \t\t\t);\n00327| \t\t}\n00328| \t\t}\n00329| \tassertThrow(nestingLevel == 0, OptimizerException, \"Unbalanced brackets\");\n00330| }\n00331| \n00332| void OptimiserSuite::runSequence(string_view _stepAbbreviations, Block& _ast, bool _repeatUntilStable)\n00333| {\n00334| \tvalidateSequence(_stepAbbreviations);\n00335| \n00336| \t// This splits 'aaa[bbb]ccc...' into 'aaa' and '[bbb]ccc...'.\n00337| \tauto extractNonNestedPrefix = [](string_view _tail) -> tuple<string_view, string_view>\n00338| \t{\n00339| \t\tfor (size_t i = 0; i < _tail.size(); ++i)\n00340| \t\t{\n00341| \t\t\tyulAssert(_tail[i] != ']');\n00342| \t\t\tif (_tail[i] == '[')\n00343| \t\t\t\treturn {_tail.substr(0, i), _tail.substr(i)};\n00344| \t\t}\n00345| \t\treturn {_tail, {}};\n00346| \t};\n00347| \n00348| \t// This splits '[bbb]ccc...' into 'bbb' and 'ccc...'.\n00349| \tauto extractBracketContent = [](string_view _tail) -> tuple<string_view, string_view>\n00350| \t{\n00351| \t\tyulAssert(!_tail.empty() && _tail[0] == '[');\n00352| \n00353| \t\tsize_t contentLength = 0;\n00354| \t\tint8_t nestingLevel = 1;\n00355| \t\tfor (char abbreviation: _tail.substr(1))\n00356| \t\t{\n00357| \t\t\tif (abbreviation == '[')\n00358| \t\t\t{\n00359| \t\t\t\tyulAssert(nestingLevel < numeric_limits<int8_t>::max());\n00360| \t\t\t\t++nestingLevel;\n00361| \t\t\t}\n00362| \t\t\telse if (abbreviation == ']')\n00363| \t\t\t{\n00364| \t\t\t\t--nestingLevel;\n00365| \t\t\t\tif (nestingLevel == 0)\n00366| \t\t\t\t\tbreak;\n00367| \t\t\t}\n00368| \t\t\t++contentLength;\n00369| \t\t}\n00370| \t\tyulAssert(nestingLevel == 0);\n00371| \t\tyulAssert(_tail[contentLength + 1] == ']');\n00372| \n00373| \t\treturn {_tail.substr(1, contentLength), _tail.substr(contentLength + 2)};\n00374| \t};\n00375| \n00376| \tauto abbreviationsToSteps = [](string_view _sequence) -> vector<string>\n00377| \t{\n00378| \t\tvector<string> steps;\n00379| \t\tfor (char abbreviation: _sequence)\n00380| \t\t\tif (abbreviation != ' ' && abbreviation != '\\n')\n00381| \t\t\t\tsteps.emplace_back(stepAbbreviationToNameMap().at(abbreviation));\n00382| \t\treturn steps;\n00383| \t};\n00384| \n00385| \tvector<tuple<string_view, bool>> subsequences;\n00386| \tstring_view tail = _stepAbbreviations;\n00387| \twhile (!tail.empty())\n00388| \t{\n00389| \t\tstring_view subsequence;\n00390| \t\ttie(subsequence, tail) = extractNonNestedPrefix(tail);\n00391| \t\tif (subsequence.size() > 0)\n00392| \t\t\tsubsequences.push_back({subsequence, false});\n00393| \n00394| \t\tif (tail.empty())\n00395| \t\t\tbreak;\n00396| \n00397| \t\ttie(subsequence, tail) = extractBracketContent(tail);\n00398| \t\tif (subsequence.size() > 0)\n00399| \t\t\tsubsequences.push_back({subsequence, true});\n00400| \t}\n00401| \n00402| \tsize_t codeSize = 0;\n00403| \tfor (size_t round = 0; round < MaxRounds; ++round)\n00404| \t{\n00405| \t\tfor (auto const& [subsequence, repeat]: subsequences)\n00406| \t\t{\n00407| \t\t\tif (repeat)\n00408| \t\t\t\trunSequence(subsequence, _ast, true);\n00409| \t\t\telse\n00410| \t\t\t\trunSequence(abbreviationsToSteps(subsequence), _ast);\n00411| \t\t}\n00412| \n00413| \t\tif (!_repeatUntilStable)\n00414| \t\t\tbreak;\n00415| \n00416| \t\tsize_t newSize = CodeSize::codeSizeIncludingFunctions(_ast);\n00417| \t\tif (newSize == codeSize)\n00418| \t\t\tbreak;\n00419| \t\tcodeSize = newSize;\n00420| \t}\n00421| }\n00422| \n00423| void OptimiserSuite::runSequence(std::vector<string> const& _steps, Block& _ast)\n00424| {\n00425| \tunique_ptr<Block> copy;\n00426| \tif (m_debug == Debug::PrintChanges)\n00427| \t\tcopy = make_unique<Block>(std::get<Block>(ASTCopier{}(_ast)));\n00428| \tfor (string const& step: _steps)\n00429| \t{\n00430| \t\tif (m_debug == Debug::PrintStep)\n00431| \t\t\tcout << \"Running \" << step << endl;\n00432| \t\tallSteps().at(step)->run(m_context, _ast);\n00433| \t\tif (m_debug == Debug::PrintChanges)\n00434| \t\t{\n00435| \t\t\t// TODO should add switch to also compare variable names!\n00436| \t\t\tif (SyntacticallyEqual{}.statementEqual(_ast, *copy))\n00437| \t\t\t\tcout << \"== Running \" << step << \" did not cause changes.\" << endl;\n00438| \t\t\telse\n00439| \t\t\t{\n00440| \t\t\t\tcout << \"== Running \" << step << \" changed the AST.\" << endl;\n00441| \t\t\t\tcout << AsmPrinter{}(_ast) << endl;\n00442| \t\t\t\tcopy = make_unique<Block>(std::get<Block>(ASTCopier{}(_ast)));\n00443| \t\t\t}\n00444| \t\t}\n00445| \t}\n00446| }\n00447| \n\n(End of file - total 447 lines)\n</file>",
+          "synthetic": true
+        },
+        {
+          "id": "prt_c271223c60027aTfg0qDP2Ym5M",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223bf001m4FimvSpDZ7uge",
+          "type": "text",
+          "text": "<file>\n00001| /*\n00002| \tThis file is part of solidity.\n00003| \n00004| \tsolidity is free software: you can redistribute it and/or modify\n00005| \tit under the terms of the GNU General Public License as published by\n00006| \tthe Free Software Foundation, either version 3 of the License, or\n00007| \t(at your option) any later version.\n00008| \n00009| \tsolidity is distributed in the hope that it will be useful,\n00010| \tbut WITHOUT ANY WARRANTY; without even the implied warranty of\n00011| \tMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n00012| \tGNU General Public License for more details.\n00013| \n00014| \tYou should have received a copy of the GNU General Public License\n00015| \talong with solidity.  If not, see <http://www.gnu.org/licenses/>.\n00016| */\n00017| // SPDX-License-Identifier: GPL-3.0\n00018| /**\n00019|  * Optimiser suite that combines all steps and also provides the settings for the heuristics.\n00020|  */\n00021| \n00022| #pragma once\n00023| \n00024| #include <libyul/ASTForward.h>\n00025| #include <libyul/YulString.h>\n00026| #include <libyul/optimiser/OptimiserStep.h>\n00027| #include <libyul/optimiser/NameDispenser.h>\n00028| #include <liblangutil/EVMVersion.h>\n00029| \n00030| #include <set>\n00031| #include <string>\n00032| #include <string_view>\n00033| #include <memory>\n00034| \n00035| namespace solidity::yul\n00036| {\n00037| \n00038| struct AsmAnalysisInfo;\n00039| struct Dialect;\n00040| class GasMeter;\n00041| struct Object;\n00042| \n00043| /**\n00044|  * Optimiser suite that combines all steps and also provides the settings for the heuristics.\n00045|  * Only optimizes the code of the provided object, does not descend into the sub-objects.\n00046|  */\n00047| class OptimiserSuite\n00048| {\n00049| public:\n00050| \tstatic constexpr size_t MaxRounds = 12;\n00051| \n00052| \t/// Special characters that do not represent optimiser steps but are allowed in abbreviation sequences.\n00053| \t/// Some of them (like whitespace) are ignored, others (like brackets) are a part of the syntax.\n00054| \tstatic constexpr char NonStepAbbreviations[] = \" \\n[]\";\n00055| \n00056| \tenum class Debug\n00057| \t{\n00058| \t\tNone,\n00059| \t\tPrintStep,\n00060| \t\tPrintChanges\n00061| \t};\n00062| \tOptimiserSuite(OptimiserStepContext& _context, Debug _debug = Debug::None): m_context(_context), m_debug(_debug) {}\n00063| \n00064| \t/// The value nullopt for `_expectedExecutionsPerDeployment` represents creation code.\n00065| \tstatic void run(\n00066| \t\tDialect const& _dialect,\n00067| \t\tGasMeter const* _meter,\n00068| \t\tObject& _object,\n00069| \t\tbool _optimizeStackAllocation,\n00070| \t\tstd::string_view _optimisationSequence,\n00071| \t\tstd::optional<size_t> _expectedExecutionsPerDeployment,\n00072| \t\tstd::set<YulString> const& _externallyUsedIdentifiers = {}\n00073| \t);\n00074| \n00075| \t/// Ensures that specified sequence of step abbreviations is well-formed and can be executed.\n00076| \t/// @throw OptimizerException if the sequence is invalid\n00077| \tstatic void validateSequence(std::string_view _stepAbbreviations);\n00078| \n00079| \tvoid runSequence(std::vector<std::string> const& _steps, Block& _ast);\n00080| \tvoid runSequence(std::string_view _stepAbbreviations, Block& _ast, bool _repeatUntilStable = false);\n00081| \n00082| \tstatic std::map<std::string, std::unique_ptr<OptimiserStep>> const& allSteps();\n00083| \tstatic std::map<std::string, char> const& stepNameToAbbreviationMap();\n00084| \tstatic std::map<char, std::string> const& stepAbbreviationToNameMap();\n00085| \n00086| private:\n00087| \tOptimiserStepContext& m_context;\n00088| \tDebug m_debug;\n00089| };\n00090| \n00091| }\n00092| \n\n(End of file - total 92 lines)\n</file>",
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c271223cc002VIjnK96myUH2Yi",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "assistant",
+        "time": {
+          "created": 1770182026188,
+          "completed": 1770182037160
+        },
+        "parentID": "msg_c271223bf001m4FimvSpDZ7uge",
+        "modelID": "k2p5",
+        "providerID": "kimi-for-coding",
+        "mode": "plan",
+        "agent": "plan",
+        "path": {
+          "cwd": "/data1/sureyang/repo/Workspace/0204/solidity",
+          "root": "/data1/sureyang/repo/Workspace/0204/solidity"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 23288,
+          "output": 664,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "stop"
+      },
+      "parts": [
+        {
+          "id": "prt_c27123662001Pqrx1nAjRBfciM",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223cc002VIjnK96myUH2Yi",
+          "type": "step-start",
+          "snapshot": "c18486a8f5b56eed94c7baf20e535b6684e80993"
+        },
+        {
+          "id": "prt_c27123664001UyiwuhoSRts6h1",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223cc002VIjnK96myUH2Yi",
+          "type": "text",
+          "text": "我来分析代码并为你设计一个最简单的试验性方案。\n\n## 当前代码分析\n\n从 `Suite.cpp` 可以看到优化流程：\n1. 第122行: `suite.runSequence(\"hgfo\", ast)` - 必需的前置步骤\n2. 第124行: `NameSimplifier::run(...)` - 名称简化\n3. 第126行: `suite.runSequence(_optimisationSequence, ast)` - 用户提供的优化序列\n4. 第130行: `suite.runSequence(\"g\", ast)` - 函数分组\n5. 第135-140行: `StackCompressor::run(...)` - 栈压缩\n6. 第141行: `suite.runSequence(\"fDnTOc g\", ast)` - 更多优化步骤\n7. 第146行: `ConstantOptimiser` - 常量优化\n8. 第155-159行: `StackLimitEvader::run(...)` - 栈限制规避\n9. 第170-171行: `NameSimplifier`, `VarNameCleaner` - 清理步骤\n\n## 最简单的试验性方案\n\n**方案：添加一个全局/静态标志来控制是否执行所有 passes**\n\n这是最简单的方法，只需要修改 `Suite.cpp` 中的 `run` 函数：\n\n```cpp\n// 在 Suite.h 中添加静态标志\nclass OptimiserSuite\n{\npublic:\n    static bool s_skipAllPasses;  // 新增：控制是否跳过所有 passes\n    // ... 其他代码\n};\n```\n\n```cpp\n// 在 Suite.cpp 中实现\nbool OptimiserSuite::s_skipAllPasses = false;\n\nvoid OptimiserSuite::run(...)\n{\n    if (s_skipAllPasses) {\n        // 只保留最基本的必需处理，或者完全跳过\n        // 选项1: 完全跳过，直接返回\n        return;\n        \n        // 选项2: 只保留 Disambiguator（必需）\n        // *_object.code = std::get<Block>(Disambiguator(...)(*_object.code));\n        // return;\n    }\n    \n    // 原有的所有代码...\n}\n```\n\n## 使用方式\n\n```cpp\n// 在需要的地方启用跳过\nsolidity::yul::OptimiserSuite::s_skipAllPasses = true;\n\n// 调用编译...\n```\n\n## 这个方案的优点\n\n1. **极简实现** - 只需添加一个静态变量和一行检查\n2. **全局控制** - 一次设置，影响所有后续编译\n3. **试验性友好** - 容易开启/关闭，不影响其他代码\n4. **可扩展** - 后续可以改为更复杂的配置方式\n\n## 需要确认的问题\n\n1. **完全跳过的安全性** - 如果完全跳过所有优化，包括 `Disambiguator`，可能会导致后续代码生成出错。建议至少保留 `Disambiguator`。\n\n2. **控制方式** - 是否需要通过编译器命令行参数控制？还是通过环境变量？还是仅通过代码设置？\n\n3. **粒度** - 是否需要更细粒度的控制（比如只跳过某些特定 passes）？\n\n这个方案是否符合你的试验需求？还是需要更细粒度的控制？",
+          "time": {
+            "start": 1770182037076,
+            "end": 1770182037076
+          }
+        },
+        {
+          "id": "prt_c27124e5e0014bqDf81WJs9zk2",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271223cc002VIjnK96myUH2Yi",
+          "type": "step-finish",
+          "reason": "stop",
+          "snapshot": "c18486a8f5b56eed94c7baf20e535b6684e80993",
+          "cost": 0,
+          "tokens": {
+            "input": 23288,
+            "output": 664,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c271a4f4d00121ttDFfJ7bvw19",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "user",
+        "time": {
+          "created": 1770182561618
+        },
+        "summary": {
+          "title": "Control methods: pros and cons in three sentences",
+          "diffs": []
+        },
+        "agent": "plan",
+        "model": {
+          "providerID": "kimi-for-coding",
+          "modelID": "k2p5"
+        },
+        "variant": "max"
+      },
+      "parts": [
+        {
+          "id": "prt_c271a4f4e0014iYet7yDWvp547",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271a4f4d00121ttDFfJ7bvw19",
+          "type": "text",
+          "text": "不同控制方式的优劣是什么？三句话简述"
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c271a4f55002fUKevj2LgqiAfU",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "assistant",
+        "time": {
+          "created": 1770182561621,
+          "completed": 1770182564404
+        },
+        "parentID": "msg_c271a4f4d00121ttDFfJ7bvw19",
+        "modelID": "k2p5",
+        "providerID": "kimi-for-coding",
+        "mode": "plan",
+        "agent": "plan",
+        "path": {
+          "cwd": "/data1/sureyang/repo/Workspace/0204/solidity",
+          "root": "/data1/sureyang/repo/Workspace/0204/solidity"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 23969,
+          "output": 85,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "stop"
+      },
+      "parts": [
+        {
+          "id": "prt_c271a5709001r66ykQZ28R2ru1",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271a4f55002fUKevj2LgqiAfU",
+          "type": "step-start",
+          "snapshot": "526b4ccc709b4a8d1732367c16c6068c71b16134"
+        },
+        {
+          "id": "prt_c271a5709002YkSGv0B8kxZupz",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271a4f55002fUKevj2LgqiAfU",
+          "type": "text",
+          "text": "三种控制方式对比：\n\n1. **静态全局变量** - 最简单，但线程不安全，难以动态切换\n2. **命令行参数** - 用户友好，可灵活控制，但需修改参数解析和传递链\n3. **环境变量** - 无需修改接口，适合试验性开关，但不够显式且难以发现\n\n你倾向哪种？还是组合使用？",
+          "time": {
+            "start": 1770182564367,
+            "end": 1770182564367
+          }
+        },
+        {
+          "id": "prt_c271a5a12001ZHl6VYMZ3JuBMH",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271a4f55002fUKevj2LgqiAfU",
+          "type": "step-finish",
+          "reason": "stop",
+          "snapshot": "526b4ccc709b4a8d1732367c16c6068c71b16134",
+          "cost": 0,
+          "tokens": {
+            "input": 23969,
+            "output": 85,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c271ad09d001rlGhqiPRRlMaJK",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "user",
+        "time": {
+          "created": 1770182594721
+        },
+        "summary": {
+          "title": "Minimize env var changes",
+          "diffs": []
+        },
+        "agent": "plan",
+        "model": {
+          "providerID": "kimi-for-coding",
+          "modelID": "k2p5"
+        },
+        "variant": "max"
+      },
+      "parts": [
+        {
+          "id": "prt_c271ad09d002XiiLyKfbVCGgUq",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad09d001rlGhqiPRRlMaJK",
+          "type": "text",
+          "text": "环境变量吧，但是我希望改动尽可能少，越少越好"
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c271ad0a5002AvzKgcw9kYR5t3",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "assistant",
+        "time": {
+          "created": 1770182594725,
+          "completed": 1770182596708
+        },
+        "parentID": "msg_c271ad09d001rlGhqiPRRlMaJK",
+        "modelID": "k2p5",
+        "providerID": "kimi-for-coding",
+        "mode": "plan",
+        "agent": "plan",
+        "path": {
+          "cwd": "/data1/sureyang/repo/Workspace/0204/solidity",
+          "root": "/data1/sureyang/repo/Workspace/0204/solidity"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 24073,
+          "output": 52,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls"
+      },
+      "parts": [
+        {
+          "id": "prt_c271ad700001NltPQ99P1rX46b",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad0a5002AvzKgcw9kYR5t3",
+          "type": "step-start",
+          "snapshot": "526b4ccc709b4a8d1732367c16c6068c71b16134"
+        },
+        {
+          "id": "prt_c271ad70100119wsxr94ApIYS5",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad0a5002AvzKgcw9kYR5t3",
+          "type": "tool",
+          "callID": "tool_niWIvIBvHCaEtZ79CNihrHJp",
+          "tool": "read",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/data1/sureyang/repo/Workspace/0204/solidity/libyul/optimiser/Suite.cpp",
+              "offset": 85,
+              "limit": 20
+            },
+            "output": "<file>\n00086| using namespace solidity;\n00087| using namespace solidity::yul;\n00088| \n00089| /// 控制跳过所有passes\n00090| bool OptimiserSuite::s_skipAllPasses = false;\n00091| \n00092| void OptimiserSuite::run(\n00093| \tDialect const& _dialect,\n00094| \tGasMeter const* _meter,\n00095| \tObject& _object,\n00096| \tbool _optimizeStackAllocation,\n00097| \tstring_view _optimisationSequence,\n00098| \toptional<size_t> _expectedExecutionsPerDeployment,\n00099| \tset<YulString> const& _externallyUsedIdentifiers\n00100| )\n00101| {\n00102| \tif (s_skipAllPasses) {\n00103| \t\treturn;\n00104| \t}\n00105| \t/*\n\n(File has more lines. Use 'offset' parameter to read beyond line 105)\n</file>",
+            "title": "libyul/optimiser/Suite.cpp",
+            "metadata": {
+              "preview": "using namespace solidity;\nusing namespace solidity::yul;\n\n/// 控制跳过所有passes\nbool OptimiserSuite::s_skipAllPasses = false;\n\nvoid OptimiserSuite::run(\n\tDialect const& _dialect,\n\tGasMeter const* _meter,\n\tObject& _object,\n\tbool _optimizeStackAllocation,\n\tstring_view _optimisationSequence,\n\toptional<size_t> _expectedExecutionsPerDeployment,\n\tset<YulString> const& _externallyUsedIdentifiers\n)\n{\n\tif (s_skipAllPasses) {\n\t\treturn;\n\t}\n\t/*",
+              "truncated": true
+            },
+            "time": {
+              "start": 1770182596669,
+              "end": 1770182596671
+            }
+          }
+        },
+        {
+          "id": "prt_c271ad842001YgtKGhamn8f0LK",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad0a5002AvzKgcw9kYR5t3",
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "526b4ccc709b4a8d1732367c16c6068c71b16134",
+          "cost": 0,
+          "tokens": {
+            "input": 24073,
+            "output": 52,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "info": {
+        "id": "msg_c271ad8670020jYSWxdkgK0Tql",
+        "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+        "role": "assistant",
+        "time": {
+          "created": 1770182596711,
+          "completed": 1770182603333
+        },
+        "parentID": "msg_c271ad09d001rlGhqiPRRlMaJK",
+        "modelID": "k2p5",
+        "providerID": "kimi-for-coding",
+        "mode": "plan",
+        "agent": "plan",
+        "path": {
+          "cwd": "/data1/sureyang/repo/Workspace/0204/solidity",
+          "root": "/data1/sureyang/repo/Workspace/0204/solidity"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 24344,
+          "output": 150,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "stop"
+      },
+      "parts": [
+        {
+          "id": "prt_c271aeb07001w9jIP7Cr4yGL9m",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad8670020jYSWxdkgK0Tql",
+          "type": "step-start",
+          "snapshot": "526b4ccc709b4a8d1732367c16c6068c71b16134"
+        },
+        {
+          "id": "prt_c271aeb08001TI1gJfpUynrCei",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad8670020jYSWxdkgK0Tql",
+          "type": "text",
+          "text": "我看到你已经添加了静态变量。现在实现环境变量版本：\n\n**方案：在 `run()` 函数开头检查环境变量**\n\n```cpp\nvoid OptimiserSuite::run(...)\n{\n    // 检查环境变量，最小改动\n    if (getenv(\"SOLC_SKIP_YUL_PASSES\")) {\n        return;\n    }\n    // ... 原有代码\n}\n```\n\n**改动点：**\n- 只需在 `run()` 函数开头添加 3 行代码\n- 无需修改头文件\n- 无需初始化静态变量\n\n**使用方式：**\n```bash\nSOLC_SKIP_YUL_PASSES=1 solc ...\n```\n\n这样够简洁吗？还是你需要保留静态变量作为备用方案？",
+          "time": {
+            "start": 1770182603294,
+            "end": 1770182603294
+          }
+        },
+        {
+          "id": "prt_c271af225001IPYtIACQzIlfVw",
+          "sessionID": "ses_3d8edf0d6ffeZDGbwot9bWY8VD",
+          "messageID": "msg_c271ad8670020jYSWxdkgK0Tql",
+          "type": "step-finish",
+          "reason": "stop",
+          "snapshot": "526b4ccc709b4a8d1732367c16c6068c71b16134",
+          "cost": 0,
+          "tokens": {
+            "input": 24344,
+            "output": 150,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -47,6 +47,8 @@ struct Object;
 class OptimiserSuite
 {
 public:
+	/// 是否跳过所有passes
+	static bool s_skipAllPasses;
 	static constexpr size_t MaxRounds = 12;
 
 	/// Special characters that do not represent optimiser steps but are allowed in abbreviation sequences.
