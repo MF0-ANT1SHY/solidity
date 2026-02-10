@@ -49,6 +49,67 @@ differences, for example, functions may be inlined, combined, or rewritten to el
 redundancies, etc. (compare the output between the flags ``--ir`` and
 ``--optimize --ir-optimized``).
 
+Disabling Optimization via ``--standard-json``
+==============================================
+
+When the standard JSON input sets ``settings.optimizer.enabled`` to ``false``, the compiler uses
+``OptimiserSettings::minimal()`` (``libsolidity/interface/StandardCompiler.cpp``,
+``parseOptimizerSettings``). This leaves only the peephole and jump-destination remover enabled
+and skips the following steps:
+
+* ``libsolidity/codegen/ExpressionCompiler.cpp``: ``ExpressionCompiler::visit(BinaryOperation)``
+  does not reorder literals because ``runOrderLiterals`` is ``false``.
+* ``libevmasm/Assembly.cpp``: ``Assembly::optimiseInternal`` skips the opcode-level optimizer
+  passes guarded by ``runInliner``, ``runDeduplicate``, ``runCSE``, and ``runConstantOptimiser``
+  (``Inliner::optimise``, ``BlockDeduplicator::deduplicate``,
+  ``CommonSubexpressionEliminator``, and ``ConstantOptimisationMethod::optimiseConstants``).
+* ``libyul/AssemblyStack.cpp``: ``AssemblyStack::optimize`` returns early when
+  ``runYulOptimiser`` is ``false``, so ``OptimiserSuite::run`` is not invoked.
+* ``libsolidity/codegen/CompilerContext.cpp``: the inline-assembly path only calls
+  ``CompilerContext::optimizeYul`` when ``runYulOptimiser`` is ``true``, and the subsequent
+  ``yul::CodeGenerator::assemble`` call receives ``optimizeStackAllocation = false``.
+
+Comparison with the current "disable optimization suite" change
+---------------------------------------------------------------
+
+The current branch disables the Yul optimizer suite via
+``libyul/optimiser/Suite.cpp`` (``OptimiserSuite::s_skipAllPasses`` and the early return in
+``OptimiserSuite::run``). Compared to ``settings.optimizer.enabled = false`` above, this misses
+several skips that still need to happen:
+
+* The non-Yul optimizer flags (``runOrderLiterals``, ``runInliner``, ``runDeduplicate``,
+  ``runCSE``, ``runConstantOptimiser``) are still honoured by
+  ``ExpressionCompiler::visit(BinaryOperation)`` and ``Assembly::optimiseInternal``.
+* ``AssemblyStack::optimize`` and ``CompilerContext::optimizeYul`` still execute and perform Yul
+  parsing/analysis work even though the optimizer suite is short-circuited.
+* ``optimizeStackAllocation`` can remain enabled, so ``yul::CodeGenerator::assemble`` still uses
+  the optimized stack allocator unless the top-level optimizer flags are also disabled.
+
+Missing skips compared to ``runYulOptimiser == false``
+------------------------------------------------------
+
+When only ``OptimiserSuite::s_skipAllPasses`` is enabled, the Yul optimizer entry points still
+execute. With ``runYulOptimiser == false``, these calls are skipped entirely. The missing skips
+and their IR impact are:
+
+* ``libyul/AssemblyStack.cpp``: ``AssemblyStack::optimize`` and
+  ``AssemblyStack::optimize(Object&, bool)`` are still invoked. If optimization were active, the
+  suite would structurally change the Yul IR (for example, ``BlockFlattener`` flattens nested
+  ``{ { ... } }`` blocks into a single block, and ``DeadCodeEliminator`` can remove an unused
+  ``let tmp := 1`` statement).
+* ``libsolidity/codegen/CompilerContext.cpp``: ``CompilerContext::optimizeYul`` still runs for
+  ABI/utility Yul code, so the optimizer pipeline is entered. This pipeline can inline Yul
+  functions (``FullInliner`` replaces ``foo()`` with the body of ``foo``) and rewrite SSA form,
+  both of which alter the statement/function structure in the IR.
+* ``libsolidity/codegen/ContractCompiler.cpp``: ``ContractCompiler::visit(InlineAssembly)``
+  still copies and optimizes inline assembly blocks. For example, ``let x := add(1, 2); let y := x``
+  can become ``let y := add(1, 2)`` after simplification, changing the IR statement list.
+* ``libsolidity/interface/StandardCompiler.cpp`` and the code-generation sites in
+  ``libsolidity/codegen/CompilerContext.cpp`` / ``ContractCompiler.cpp`` still pass
+  ``optimizeStackAllocation = true`` into ``yul::CodeGenerator::assemble``. This changes the
+  stack layout of the IR-to-bytecode step (e.g., reusing stack slots removes ``swap``/``dup``
+  sequences), so the generated IR/assembly structure differs from a fully disabled optimizer.
+
 .. _optimizer-parameter-runs:
 
 Optimizer Parameter Runs
