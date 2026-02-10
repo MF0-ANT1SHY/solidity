@@ -90,6 +90,133 @@ Detailed Stage Map (Location + Data Model)
      - ``evmasm::LinkerObject`` + metadata JSON
      - Linked bytecode with CBOR metadata (``bytes``)
 
+Concrete Example: Counter Contract
+==================================
+
+The following minimal contract is used to illustrate how data changes across the
+pipeline. The snippets are intentionally short and show representative excerpts.
+
+Source input (Solidity)
+-----------------------
+
+.. code-block:: solidity
+
+   // SPDX-License-Identifier: MIT
+   pragma solidity ^0.8.20;
+
+   contract Counter {
+       uint256 public value;
+
+       function increment() external {
+           value += 1;
+       }
+   }
+
+Lexical analysis output (Scanner tokens)
+----------------------------------------
+
+Input: ``langutil::CharStream`` from the source above. Output: a stream of
+``langutil::Token`` values (excerpt, pragma tokens omitted).
+
+.. code-block:: text
+
+   Contract "contract"
+   Identifier "Counter"
+   LBrace "{"
+   Identifier "uint256"
+   Identifier "value"
+   Public "public"
+   Function "function"
+   Identifier "increment"
+   LParen "("
+   RParen ")"
+   External "external"
+   LBrace "{"
+   Identifier "value"
+   AssignAdd "+="
+   Number "1"
+   Semicolon ";"
+   RBrace "}"
+   RBrace "}"
+
+Parsing output (AST)
+--------------------
+
+Output: ``ASTPointer<SourceUnit>`` containing the Solidity AST.
+
+.. code-block:: text
+
+   SourceUnit
+   └─ ContractDefinition "Counter"
+      ├─ VariableDeclaration "value" (type: uint256, visibility: public)
+      └─ FunctionDefinition "increment"
+         └─ Block
+            └─ ExpressionStatement
+               └─ Assignment (operator: +=)
+                  ├─ Identifier "value"
+                  └─ Literal 1
+
+Semantic analysis output (annotated AST)
+---------------------------------------
+
+The AST is annotated via ``ASTAnnotations`` with resolved symbols and types:
+
+* ``value`` is resolved to a storage variable of type ``uint256``.
+* ``increment`` is resolved as an ``external`` function with no parameters.
+* The ``+=`` operator is typed as ``uint256`` arithmetic.
+
+IR generation output (Yul, excerpt)
+-----------------------------------
+
+Output: Yul IR text from ``IRGenerator::run`` stored in
+``CompilerStack::Contract::yulIR`` (excerpt).
+
+.. code-block:: yul
+
+   object "Counter" {
+     code {
+       // constructor + deploy logic omitted
+     }
+     object "Counter_deployed" {
+       code {
+         // dispatch omitted
+         let slot := 0
+         sstore(slot, add(sload(slot), 1))
+       }
+     }
+   }
+
+IR optimization output
+----------------------
+
+The Yul optimizer rewrites the IR (stored in ``yulIROptimized``), for example
+by simplifying arithmetic and removing dead code. The structure remains Yul text.
+
+Legacy / IR-based codegen output (EVM assembly, excerpt)
+--------------------------------------------------------
+
+Output: ``evmasm::Assembly`` containing EVM opcodes. For the increment logic,
+the assembly excerpt is:
+
+.. code-block:: text
+
+   PUSH1 0x00
+   SLOAD
+   PUSH1 0x01
+   ADD
+   PUSH1 0x00
+   SSTORE
+
+Bytecode output (linked, excerpt)
+---------------------------------
+
+Output: ``evmasm::LinkerObject`` with linked bytecode and metadata. The
+increment sequence above corresponds to a bytecode excerpt like:
+
+.. code-block:: text
+
+   0x600054600101600055
+
 Data Flow Highlights
 ====================
 
