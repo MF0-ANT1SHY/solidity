@@ -123,7 +123,7 @@ Input: ``langutil::CharStream`` from the source above. Output: a stream of
    Contract "contract"
    Identifier "Counter"
    LBrace "{"
-   Identifier "uint256"
+   UIntM "uint256"
    Identifier "value"
    Public "public"
    Function "function"
