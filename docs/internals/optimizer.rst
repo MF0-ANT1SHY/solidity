@@ -49,6 +49,42 @@ differences, for example, functions may be inlined, combined, or rewritten to el
 redundancies, etc. (compare the output between the flags ``--ir`` and
 ``--optimize --ir-optimized``).
 
+Disabling Optimization via ``--standard-json``
+==============================================
+
+When the standard JSON input sets ``settings.optimizer.enabled`` to ``false``, the compiler uses
+``OptimiserSettings::minimal()`` (``libsolidity/interface/StandardCompiler.cpp``,
+``parseOptimizerSettings``). This leaves only the peephole and jump-destination remover enabled
+and skips the following steps:
+
+* ``libsolidity/codegen/ExpressionCompiler.cpp``: ``ExpressionCompiler::visit(BinaryOperation)``
+  does not reorder literals because ``runOrderLiterals`` is ``false``.
+* ``libevmasm/Assembly.cpp``: ``Assembly::optimiseInternal`` skips the opcode-level optimizer
+  passes guarded by ``runInliner``, ``runDeduplicate``, ``runCSE``, and ``runConstantOptimiser``
+  (``Inliner::optimise``, ``BlockDeduplicator::deduplicate``,
+  ``CommonSubexpressionEliminator``, and ``ConstantOptimisationMethod::optimiseConstants``).
+* ``libyul/AssemblyStack.cpp``: ``AssemblyStack::optimize`` returns early when
+  ``runYulOptimiser`` is ``false``, so ``OptimiserSuite::run`` is not invoked.
+* ``libsolidity/codegen/CompilerContext.cpp``: the inline-assembly path only calls
+  ``CompilerContext::optimizeYul`` when ``runYulOptimiser`` is ``true``, and the subsequent
+  ``yul::CodeGenerator::assemble`` call receives ``optimizeStackAllocation = false``.
+
+Comparison with the current "disable optimization suite" change
+---------------------------------------------------------------
+
+The current branch disables the Yul optimizer suite via
+``libyul/optimiser/Suite.cpp`` (``OptimiserSuite::s_skipAllPasses`` and the early return in
+``OptimiserSuite::run``). Compared to ``settings.optimizer.enabled = false`` above, this misses
+several skips that still need to happen:
+
+* The non-Yul optimizer flags (``runOrderLiterals``, ``runInliner``, ``runDeduplicate``,
+  ``runCSE``, ``runConstantOptimiser``) are still honoured by
+  ``ExpressionCompiler::visit(BinaryOperation)`` and ``Assembly::optimiseInternal``.
+* ``AssemblyStack::optimize`` and ``CompilerContext::optimizeYul`` still execute and perform Yul
+  parsing/analysis work even though the optimizer suite is short-circuited.
+* ``optimizeStackAllocation`` can remain enabled, so ``yul::CodeGenerator::assemble`` still uses
+  the optimized stack allocator unless the top-level optimizer flags are also disabled.
+
 .. _optimizer-parameter-runs:
 
 Optimizer Parameter Runs
